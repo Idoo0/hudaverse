@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Kisah - HidayahPath</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { emerald: { 500: '#10b981', 600: '#059669' }, slate: { 100: '#f1f5f9', 800: '#1e293b' } },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <main class="py-12 md:py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-slate-800">Studio Kisah</h1>
+                <p class="mt-2 text-lg text-slate-600">Kumpulan cerita penuh hikmah dari Al-Qur'an, Hadits, dan sejarah Islam.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden group">
+                    <img src="https://images.unsplash.com/photo-1604589410113-c39cf01211de?q=80&w=1932&auto=format&fit=crop" alt="Kisah Nabi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-5">
+                        <p class="text-sm font-semibold text-emerald-600 mb-1">Kisah Nabi</p>
+                        <h3 class="text-lg font-bold mb-2 text-slate-800">Kesabaran Nabi Ayyub A.S.</h3>
+                        <p class="text-slate-600 text-sm mb-4">Belajar tentang ketabahan tak terbatas dari ujian yang menimpa Nabi Ayyub...</p>
+                        <a href="#" class="font-semibold text-emerald-600 hover:text-emerald-700">Baca Selengkapnya &rarr;</a>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg shadow-md overflow-hidden group">
+                    <img src="https://images.unsplash.com/photo-1585590989578-ce355498885e?q=80&w=1964&auto=format&fit=crop" alt="Sahabat Nabi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-5">
+                        <p class="text-sm font-semibold text-emerald-600 mb-1">Sahabat Nabi</p>
+                        <h3 class="text-lg font-bold mb-2 text-slate-800">Kedermawanan Abdurrahman bin Auf</h3>
+                        <p class="text-slate-600 text-sm mb-4">Bagaimana seorang sahabat menafkahkan hartanya di jalan Allah hingga...</p>
+                        <a href="#" class="font-semibold text-emerald-600 hover:text-emerald-700">Baca Selengkapnya &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="h-28"></div>
+    <footer class="bg-slate-800 text-slate-400 py-8 text-center"><p>&copy; 2025 HidayahPath. All Rights Reserved.</p></footer>
+    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm shadow-xl rounded-full transition-all duration-300 z-50">
+        <div class="flex justify-around items-center h-16 px-4 py-2 gap-2 md:gap-4">
+            <a href="beranda.html" data-page="beranda" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="home" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Beranda</span></a>
+            <a href="fahmi.html" data-page="fahmi" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="message-circle-question" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Fahmi</span></a>
+            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all"><i data-lucide="book-open" class="w-8 h-8"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Qur'an</span></a>
+            <a href="hasanah.html" data-page="hasanah" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="sparkles" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Hasanah</span></a>
+            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="film" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Studio</span></a>
+        </div>
+    </nav>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const tooltip = link.querySelector('.tooltip');
+                if (tooltip) {
+                    link.addEventListener('mouseenter', () => { if (window.innerWidth >= 768) tooltip.classList.remove('hidden'); });
+                    link.addEventListener('mouseleave', () => { if (window.innerWidth >= 768) tooltip.classList.add('hidden'); });
+                }
+            });
+            const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
+            const activeLink = document.querySelector(`.nav-link[data-page="${currentPage}"]`);
+            if (activeLink) {
+                if (currentPage !== 'alquran') {
+                    activeLink.classList.remove('text-slate-500');
+                    activeLink.classList.add('text-emerald-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

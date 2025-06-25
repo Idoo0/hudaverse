@@ -1,0 +1,5 @@
+# requirements.txt
+flask
+python-dotenv
+google-generativeai
+flask-cors

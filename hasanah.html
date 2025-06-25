@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasanah - HidayahPath</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { emerald: { 500: '#10b981', 600: '#059669' }, slate: { 100: '#f1f5f9', 800: '#1e293b' } },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <main class="py-12 md:py-16">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-slate-800">Inspirasi Amalan Harian</h1>
+                <p class="mt-2 text-lg text-slate-600 max-w-2xl mx-auto">Masukkan ayat Al-Qur'an yang baru saja Anda baca untuk mendapatkan inspirasi amalan yang relevan.</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg mb-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div class="md:col-span-1">
+                        <label for="surah-select" class="block text-sm font-medium text-slate-700 mb-1">Surah</label>
+                        <select id="surah-select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-emerald-500 focus:outline-none"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 md:col-span-1">
+                        <div>
+                           <label for="start-ayah-input" class="block text-sm font-medium text-slate-700 mb-1">Dari Ayat</label>
+                           <input id="start-ayah-input" type="number" placeholder="misal: 1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                           <label for="end-ayah-input" class="block text-sm font-medium text-slate-700 mb-1">Sampai Ayat</label>
+                           <input id="end-ayah-input" type="number" placeholder="misal: 7" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="md:col-span-1">
+                        <button id="generate-btn" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-white font-semibold px-4 py-2 rounded-md hover:bg-emerald-600 transition-colors disabled:bg-emerald-300">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span>Dapatkan Amalan</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4">Inspirasi Amalan Untukmu</h2>
+                    <div id="habits-result-container" class="space-y-4">
+                        <div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg">
+                            <p>Saran amalan dari AI akan muncul di sini.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4">Daftar Amalanku Saat Ini</h2>
+                     <div id="my-habits-container" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="h-28"></div>
+    <footer class="bg-slate-800 text-slate-400 py-8 text-center"><p>&copy; 2025 HidayahPath. All Rights Reserved.</p></footer>
+    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm shadow-xl rounded-full transition-all duration-300 z-50">
+        <div class="flex justify-around items-center h-16 px-4 py-2 gap-2 md:gap-4">
+            <a href="beranda.html" data-page="beranda" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="home" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Beranda</span></a>
+            <a href="fahmi.html" data-page="fahmi" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="message-circle-question" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Fahmi</span></a>
+            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all"><i data-lucide="book-open" class="w-8 h-8"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Al-Qur'an</span></a>
+            <a href="hasanah.html" data-page="hasanah" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="sparkles" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Hasanah</span></a>
+            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="film" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Studio</span></a>
+        </div>
+    </nav>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+
+        // --- DOM ELEMENTS ---
+        const surahSelect = document.getElementById('surah-select');
+        const startAyahInput = document.getElementById('start-ayah-input');
+        const endAyahInput = document.getElementById('end-ayah-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const resultContainer = document.getElementById('habits-result-container');
+        const myHabitsContainer = document.getElementById('my-habits-container');
+        const API_URL = 'http://127.0.0.1:5000/api/generate-habits';
+        
+        // --- STATE & CACHE MANAGEMENT ---
+        let currentGeneratedHabits = [];
+        let myHabits = [];
+
+        const saveToCache = (key, data) => {
+            localStorage.setItem(key, JSON.stringify(data));
+        };
+
+        const loadFromCache = (key) => {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : [];
+        };
+
+        // --- RENDER FUNCTIONS (Deklarasi satu kali) ---
+        const renderGeneratedHabits = () => {
+            if (currentGeneratedHabits.length === 0) {
+                resultContainer.innerHTML = `<div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg"><p>Saran amalan dari AI akan muncul di sini.</p></div>`;
+                return;
+            }
+            resultContainer.innerHTML = '';
+            currentGeneratedHabits.forEach((habit, index) => {
+                const isAlreadyAdded = myHabits.some(myHabit => myHabit.title === habit.title && myHabit.verse_reference === habit.verse_reference);
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-lg shadow-md flex items-start gap-4";
+                card.innerHTML = `
+                    <div class="flex-shrink-0 p-3 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="lightbulb" class="w-6 h-6"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-slate-800">${habit.title}</h3>
+                        <p class="text-sm text-slate-600 my-1">${habit.description}</p>
+                        <p class="text-xs text-emerald-600 font-semibold">${habit.verse_reference}</p>
+                    </div>
+                    <button ${isAlreadyAdded ? 'disabled' : ''} data-index="${index}" class="add-habit-btn flex-shrink-0 ml-2 px-3 py-2 text-sm font-semibold rounded-md ${isAlreadyAdded ? 'bg-slate-200 text-slate-500' : 'bg-emerald-500 text-white hover:bg-emerald-600'} transition">
+                       ${isAlreadyAdded ? '<i data-lucide="check" class="w-4 h-4"></i>' : '<i data-lucide="plus" class="w-4 h-4"></i>'}
+                    </button>
+                `;
+                resultContainer.appendChild(card);
+            });
+            lucide.createIcons();
+        };
+        
+        const renderMyHabits = () => {
+            if(myHabits.length === 0) {
+                myHabitsContainer.innerHTML = `<div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg"><p>Anda belum menambahkan amalan. Pilih dari hasil inspirasi di sebelah kiri!</p></div>`;
+                return;
+            }
+            myHabitsContainer.innerHTML = '';
+            myHabits.forEach((habit, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-lg shadow-md flex items-start gap-4";
+                card.innerHTML = `
+                    <div class="flex-shrink-0 p-3 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-slate-800">${habit.title}</h3>
+                        <p class="text-sm text-slate-600 my-1">${habit.description}</p>
+                        <p class="text-xs text-emerald-600 font-semibold">${habit.verse_reference}</p>
+                    </div>
+                    <button data-index="${index}" class="remove-habit-btn flex-shrink-0 ml-2 px-3 py-2 text-sm font-semibold rounded-md bg-red-100 text-red-600 hover:bg-red-200 transition">
+                       <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                myHabitsContainer.appendChild(card);
+            });
+            lucide.createIcons();
+        };
+
+        const toggleLoadingState = (isLoading) => {
+    generateBtn.disabled = isLoading;
+    if (isLoading) {
+        // Ganti seluruh isi tombol dengan state "Loading"
+        generateBtn.innerHTML = `
+            <i data-lucide="loader-circle" class="w-5 h-5 animate-spin"></i>
+            <span>Memproses...</span>
+        `;
+    } else {
+        // Ganti seluruh isi tombol kembali ke state "Default"
+        generateBtn.innerHTML = `
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Dapatkan Amalan</span>
+        `;
+    }
+    // Panggil lucide.createIcons() SETELAH mengubah HTML untuk merender ikon baru.
+    lucide.createIcons();
+};
+
+        // --- EVENT HANDLERS ---
+        const handleGenerate = async () => {
+            const surahNumber = surahSelect.value;
+            const startAyah = startAyahInput.value;
+            const endAyah = endAyahInput.value;
+            
+            if (!startAyah || !endAyah || parseInt(startAyah) <= 0 || parseInt(startAyah) > parseInt(endAyah)) {
+                resultContainer.innerHTML = `<div class="text-center p-8 bg-red-100 text-red-700 rounded-lg"><p>Input tidak valid. Pastikan semua kolom terisi dan ayat 'Dari' lebih kecil atau sama dengan 'Sampai'.</p></div>`;
+                return; 
+            }
+
+            toggleLoadingState(true);
+            resultContainer.innerHTML = `<div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg"><div class="flex items-center justify-center gap-2"><i data-lucide="loader-circle" class="w-6 h-6 animate-spin"></i><p>Menganalisis ayat dan mencari inspirasi...</p></div></div>`;
+            lucide.createIcons();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        surah_number: parseInt(surahNumber),
+                        start_ayah: parseInt(startAyah),
+                        end_ayah: parseInt(endAyah)
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Terjadi kesalahan pada server.');
+                }
+                
+                currentGeneratedHabits = data.habits;
+                saveToCache('generatedHabits', currentGeneratedHabits);
+                renderGeneratedHabits();
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                resultContainer.innerHTML = `<div class="text-center p-8 bg-red-100 text-red-700 rounded-lg"><p>Gagal mendapatkan saran amalan: ${error.message}</p></div>`;
+            } finally {
+                toggleLoadingState(false);
+            }
+        };
+        
+        document.body.addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.add-habit-btn');
+            const removeBtn = e.target.closest('.remove-habit-btn');
+
+            if (addBtn) {
+                const habitIndex = parseInt(addBtn.dataset.index);
+                const habitToAdd = currentGeneratedHabits[habitIndex];
+                myHabits.push(habitToAdd);
+                saveToCache('myHabits', myHabits);
+                renderMyHabits();
+                renderGeneratedHabits();
+            }
+
+            if (removeBtn) {
+                const habitIndex = parseInt(removeBtn.dataset.index);
+                myHabits.splice(habitIndex, 1);
+                saveToCache('myHabits', myHabits);
+                renderMyHabits();
+                renderGeneratedHabits();
+            }
+        });
+        
+        // --- INITIALIZATION ---
+        const daftarSurahLengkap = [ {"nomor":1,"nama_latin":"Al-Fatihah"},{"nomor":2,"nama_latin":"Al-Baqarah"},{"nomor":3,"nama_latin":"Ali 'Imran"},{"nomor":4,"nama_latin":"An-Nisa'"},{"nomor":5,"nama_latin":"Al-Ma'idah"},{"nomor":6,"nama_latin":"Al-An'am"},{"nomor":7,"nama_latin":"Al-A'raf"},{"nomor":8,"nama_latin":"Al-Anfal"},{"nomor":9,"nama_latin":"At-Taubah"},{"nomor":10,"nama_latin":"Yunus"},{"nomor":11,"nama_latin":"Hud"},{"nomor":12,"nama_latin":"Yusuf"},{"nomor":13,"nama_latin":"Ar-Ra'd"},{"nomor":14,"nama_latin":"Ibrahim"},{"nomor":15,"nama_latin":"Al-Hijr"},{"nomor":16,"nama_latin":"An-Nahl"},{"nomor":17,"nama_latin":"Al-Isra'"},{"nomor":18,"nama_latin":"Al-Kahf"},{"nomor":19,"nama_latin":"Maryam"},{"nomor":20,"nama_latin":"Taha"},{"nomor":21,"nama_latin":"Al-Anbiya'"},{"nomor":22,"nama_latin":"Al-Hajj"},{"nomor":23,"nama_latin":"Al-Mu'minun"},{"nomor":24,"nama_latin":"An-Nur"},{"nomor":25,"nama_latin":"Al-Furqan"},{"nomor":26,"nama_latin":"Asy-Syu'ara'"},{"nomor":27,"nama_latin":"An-Naml"},{"nomor":28,"nama_latin":"Al-Qasas"},{"nomor":29,"nama_latin":"Al-'Ankabut"},{"nomor":30,"nama_latin":"Ar-Rum"},{"nomor":31,"nama_latin":"Luqman"},{"nomor":32,"nama_latin":"As-Sajdah"},{"nomor":33,"nama_latin":"Al-Ahzab"},{"nomor":34,"nama_latin":"Saba'"},{"nomor":35,"nama_latin":"Fatir"},{"nomor":36,"nama_latin":"Yasin"},{"nomor":37,"nama_latin":"As-Saffat"},{"nomor":38,"nama_latin":"Sad"},{"nomor":39,"nama_latin":"Az-Zumar"},{"nomor":40,"nama_latin":"Ghafir"},{"nomor":41,"nama_latin":"Fussilat"},{"nomor":42,"nama_latin":"Asy-Syura"},{"nomor":43,"nama_latin":"Az-Zukhruf"},{"nomor":44,"nama_latin":"Ad-Dukhan"},{"nomor":45,"nama_latin":"Al-Jasiyah"},{"nomor":46,"nama_latin":"Al-Ahqaf"},{"nomor":47,"nama_latin":"Muhammad"},{"nomor":48,"nama_latin":"Al-Fath"},{"nomor":49,"nama_latin":"Al-Hujurat"},{"nomor":50,"nama_latin":"Qaf"},{"nomor":51,"nama_latin":"Az-Zariyat"},{"nomor":52,"nama_latin":"At-Tur"},{"nomor":53,"nama_latin":"An-Najm"},{"nomor":54,"nama_latin":"Al-Qamar"},{"nomor":55,"nama_latin":"Ar-Rahman"},{"nomor":56,"nama_latin":"Al-Waqi'ah"},{"nomor":57,"nama_latin":"Al-Hadid"},{"nomor":58,"nama_latin":"Al-Mujadilah"},{"nomor":59,"nama_latin":"Al-Hasyr"},{"nomor":60,"nama_latin":"Al-Mumtahanah"},{"nomor":61,"nama_latin":"As-Saff"},{"nomor":62,"nama_latin":"Al-Jumu'ah"},{"nomor":63,"nama_latin":"Al-Munafiqun"},{"nomor":64,"nama_latin":"At-Tagabun"},{"nomor":65,"nama_latin":"At-Talaq"},{"nomor":66,"nama_latin":"At-Tahrim"},{"nomor":67,"nama_latin":"Al-Mulk"},{"nomor":68,"nama_latin":"Al-Qalam"},{"nomor":69,"nama_latin":"Al-Haqqah"},{"nomor":70,"nama_latin":"Al-Ma'arij"},{"nomor":71,"nama_latin":"Nuh"},{"nomor":72,"nama_latin":"Al-Jinn"},{"nomor":73,"nama_latin":"Al-Muzzammil"},{"nomor":74,"nama_latin":"Al-Muddassir"},{"nomor":75,"nama_latin":"Al-Qiyamah"},{"nomor":76,"nama_latin":"Al-Insan"},{"nomor":77,"nama_latin":"Al-Mursalat"},{"nomor":78,"nama_latin":"An-Naba'"},{"nomor":79,"nama_latin":"An-Nazi'at"},{"nomor":80,"nama_latin":"'Abasa"},{"nomor":81,"nama_latin":"At-Takwir"},{"nomor":82,"nama_latin":"Al-Infitar"},{"nomor":83,"nama_latin":"Al-Mutaffifin"},{"nomor":84,"nama_latin":"Al-Insyiqaq"},{"nomor":85,"nama_latin":"Al-Buruj"},{"nomor":86,"nama_latin":"At-Tariq"},{"nomor":87,"nama_latin":"Al-A'la"},{"nomor":88,"nama_latin":"Al-Ghasyiyah"},{"nomor":89,"nama_latin":"Al-Fajr"},{"nomor":90,"nama_latin":"Al-Balad"},{"nomor":91,"nama_latin":"Asy-Syams"},{"nomor":92,"nama_latin":"Al-Lail"},{"nomor":93,"nama_latin":"Ad-Duha"},{"nomor":94,"nama_latin":"Asy-Syarh"},{"nomor":95,"nama_latin":"At-Tin"},{"nomor":96,"nama_latin":"Al-'Alaq"},{"nomor":97,"nama_latin":"Al-Qadr"},{"nomor":98,"nama_latin":"Al-Bayyinah"},{"nomor":99,"nama_latin":"Az-Zalzalah"},{"nomor":100,"nama_latin":"Al-'Adiyat"},{"nomor":101,"nama_latin":"Al-Qari'ah"},{"nomor":102,"nama_latin":"At-Takasur"},{"nomor":103,"nama_latin":"Al-'Asr"},{"nomor":104,"nama_latin":"Al-Humazah"},{"nomor":105,"nama_latin":"Al-Fil"},{"nomor":106,"nama_latin":"Quraisy"},{"nomor":107,"nama_latin":"Al-Ma'un"},{"nomor":108,"nama_latin":"Al-Kausar"},{"nomor":109,"nama_latin":"Al-Kafirun"},{"nomor":110,"nama_latin":"An-Nasr"},{"nomor":111,"nama_latin":"Al-Masad"},{"nomor":112,"nama_latin":"Al-Ikhlas"},{"nomor":113,"nama_latin":"Al-Falaq"},{"nomor":114,"nama_latin":"An-Nas"} ];
+
+        daftarSurahLengkap.forEach(surah => {
+            surahSelect.add(new Option(`${surah.nomor}. ${surah.nama_latin}`, surah.nomor));
+        });
+
+        generateBtn.addEventListener('click', handleGenerate);
+
+        myHabits = loadFromCache('myHabits');
+        currentGeneratedHabits = loadFromCache('generatedHabits');
+        renderMyHabits();
+        renderGeneratedHabits();
+
+        const activeLink = document.querySelector(`.nav-link[data-page="hasanah"]`);
+        if (activeLink) activeLink.classList.replace('text-slate-500', 'text-emerald-500');
+    });
+</script>
+</body>
+</html>

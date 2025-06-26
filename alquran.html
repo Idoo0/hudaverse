@@ -25,22 +25,54 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         .font-arabic { font-family: 'Scheherazade New', serif; }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased">
 
     <main class="py-12 md:py-16 min-h-[calc(100vh-180px)]">
         <div id="quran-container" class="container mx-auto px-4 md:px-6">
+            <!-- Surah List View -->
             <div id="surah-list-view">
                 <div class="text-center mb-10">
                     <h1 class="text-4xl font-bold text-slate-800">Al-Qur'an Al-Karim</h1>
                     <p class="mt-2 text-lg text-slate-600">Pilih Surah untuk mulai membaca dan mendengarkan.</p>
                 </div>
-                <div id="surah-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="text-center p-8 text-slate-500">Memuat daftar surah...</div>
+                
+                <!-- Search Bar -->
+                <div class="max-w-md mx-auto mb-8">
+                    <div class="relative">
+                        <input type="text" id="search-surah" placeholder="Cari surah..." 
+                               class="w-full px-4 py-3 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        <i data-lucide="search" class="absolute left-3 top-3.5 w-4 h-4 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Loading placeholders -->
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md loading-shimmer h-24"></div>
+                </div>
+
+                <!-- Surah Grid -->
+                <div id="surah-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
                 </div>
             </div>
 
+            <!-- Surah Reader View -->
             <div id="surah-reader-view" class="hidden"></div>
         </div>
     </main>
@@ -57,79 +89,166 @@
         </div>
     </nav>
     
+    <!-- Load QuranDataManager -->
+    <script src="js/quran-data.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ==============================================
-            // BAGIAN DATA AL-QUR'AN (DENGAN LINK AUDIO)
-            // ==============================================
-            const daftarSurahLengkap = [{"nomor":1,"nama":"Al Fatihah","nama_latin":"Al-Fātiḥah","jumlah_ayat":7,"tempat_turun":"mekah","arti":"Pembukaan"},{"nomor":2,"nama":"Al Baqarah","nama_latin":"Al-Baqarah","jumlah_ayat":286,"tempat_turun":"madinah","arti":"Sapi Betina"},{"nomor":3,"nama":"Ali 'Imran","nama_latin":"Āli 'Imrān","jumlah_ayat":200,"tempat_turun":"madinah","arti":"Keluarga 'Imran"},{"nomor":4,"nama":"An Nisa'","nama_latin":"An-Nisā","jumlah_ayat":176,"tempat_turun":"madinah","arti":"Wanita"},{"nomor":5,"nama":"Al Ma'idah","nama_latin":"Al-Mā'idah","jumlah_ayat":120,"tempat_turun":"madinah","arti":"Jamuan (Hidangan Makanan)"}, /* ... data lengkap surah lainnya ... */ {"nomor":112,"nama":"Al Ikhlas","nama_latin":"Al-Ikhlāṣ","jumlah_ayat":4,"tempat_turun":"mekah","arti":"Ikhlas"},{"nomor":113,"nama":"Al Falaq","nama_latin":"Al-Falaq","jumlah_ayat":5,"tempat_turun":"mekah","arti":"Waktu Subuh"},{"nomor":114,"nama":"An Nas","nama_latin":"An-Nās","jumlah_ayat":6,"tempat_turun":"mekah","arti":"Manusia"}];
-            const dataAyatSurah = {
-                '1': { "audio_full": "https://server7.mp3quran.net/s_gmd/001.mp3", "ayat":[{"nomor":1,"teks_arab":"بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ","teks_indonesia":"Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."},{"nomor":2,"teks_arab":"اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَۙ","teks_indonesia":"Segala puji bagi Allah, Tuhan seluruh alam,"},{"nomor":3,"teks_arab":"الرَّحْمٰنِ الرَّحِيْمِۙ","teks_indonesia":"Yang Maha Pengasih, Maha Penyayang,"},{"nomor":4,"teks_arab":"مٰلِكِ يَوْمِ الدِّيْنِۗ","teks_indonesia":"Pemilik hari pembalasan."},{"nomor":5,"teks_arab":"اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُۗ","teks_indonesia":"Hanya kepada Engkaulah kami menyembah dan hanya kepada Engkaulah kami mohon pertolongan."},{"nomor":6,"teks_arab":"اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ ۙ","teks_indonesia":"Tunjukilah kami jalan yang lurus,"},{"nomor":7,"teks_arab":"صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ ەۙ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّاۤلِّيْنَ ࣖ","teks_indonesia":"(yaitu) jalan orang-orang yang telah Engkau beri nikmat kepadanya; bukan (jalan) mereka yang dimurkai, dan bukan (pula jalan) mereka yang sesat."}]},
-                '112': { "audio_full": "https://server7.mp3quran.net/s_gmd/112.mp3", "ayat":[{"nomor":1,"teks_arab":"قُلْ هُوَ اللّٰهُ اَحَدٌۚ","teks_indonesia":"Katakanlah (Muhammad), “Dialah Allah, Yang Maha Esa."},{"nomor":2,"teks_arab":"اَللّٰهُ الصَّمَدُۚ","teks_indonesia":"Allah tempat meminta segala sesuatu."},{"nomor":3,"teks_arab":"لَمْ يَلِدْ وَلَمْ يُوْلَدْۙ","teks_indonesia":"(Allah) tidak beranak dan tidak pula diperanakkan."},{"nomor":4,"teks_arab":"وَلَمْ يَكُنْ لَّهٗ كُفُوًا اَحَدٌ ࣖ","teks_indonesia":"Dan tidak ada sesuatu yang setara dengan Dia.”"}]},
-                '113': { "audio_full": "https://server7.mp3quran.net/s_gmd/113.mp3", "ayat":[{"nomor":1,"teks_arab":"قُلْ اَعُوْذُ بِرَبِّ الْفَلَقِۙ","teks_indonesia":"Katakanlah, “Aku berlindung kepada Tuhan yang menguasai subuh (fajar),"},{"nomor":2,"teks_arab":"مِنْ شَرِّ مَا خَلَقَۙ","teks_indonesia":"dari kejahatan (makhluk yang) Dia ciptakan,"},{"nomor":3,"teks_arab":"وَمِنْ شَرِّ غَاسِqٍ اِذَا وَقَبَۙ","teks_indonesia":"dan dari kejahatan malam apabila telah gelap gulita,"},{"nomor":4,"teks_arab":"وَمِنْ شَرِّ النَّفّٰثٰتِ فِى الْعُقَدِۙ","teks_indonesia":"dan dari kejahatan (perempuan-perempuan) penyihir yang meniup pada buhul-buhul (talinya),"},{"nomor":5,"teks_arab":"وَمِنْ شَرِّ حَاسِدٍ اِذَا حَسَدَ ࣖ","teks_indonesia":"dan dari kejahatan orang yang dengki apabila dia dengki.”"}]},
-                '114': { "audio_full": "https://server7.mp3quran.net/s_gmd/114.mp3", "ayat":[{"nomor":1,"teks_arab":"قُلْ اَعُوْذُ بِرَبِّ النَّاسِۙ","teks_indonesia":"Katakanlah, “Aku berlindung kepada Tuhannya manusia,"},{"nomor":2,"teks_arab":"مَلِكِ النَّاسِۙ","teks_indonesia":"Raja manusia,"},{"nomor":3,"teks_arab":"اِلٰهِ النَّاسِۙ","teks_indonesia":"sembahan manusia,"},{"nomor":4,"teks_arab":"مِنْ شَرِّ الْوَسْوَاسِ ەۙ الْخَنَّاسِۖ","teks_indonesia":"dari kejahatan (bisikan) setan yang bersembunyi,"},{"nomor":5,"teks_arab":"الَّذِيْ يُوَسْوِسُ فِيْ صُدُوْرِ النَّاسِۙ","teks_indonesia":"yang membisikkan (kejahatan) ke dalam dada manusia,"},{"nomor":6,"teks_arab":"مِنَ الْجِنَّةِ وَالنَّاسِ ࣖ","teks_indonesia":"dari (golongan) jin dan manusia.”"}]}
-            };
-
-            // ==============================================
-            // BAGIAN LOGIKA APLIKASI
-            // ==============================================
-
-            // Inisialisasi global audio player
-            const audioPlayer = new Audio();
-            let currentPlayingSurah = null;
-
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize elements
             const surahListView = document.getElementById('surah-list-view');
             const surahReaderView = document.getElementById('surah-reader-view');
             const surahGrid = document.getElementById('surah-grid');
+            const loadingState = document.getElementById('loading-state');
+            const searchInput = document.getElementById('search-surah');
 
-            function renderSurahList() {
+            // Initialize data manager
+            const quranManager = new QuranDataManager();
+            await quranManager.init();
+
+            // Audio player
+            const audioPlayer = new Audio();
+            let currentPlayingSurah = null;
+
+            // Show surah list
+            function renderSurahList(filteredList = null) {
+                const surahList = filteredList || quranManager.getSurahList();
+                
                 surahGrid.innerHTML = '';
-                daftarSurahLengkap.forEach(surah => {
+                surahList.forEach(surah => {
+                    const tempat = surah.tempat_turun === 'mekah' ? 'Makkiyyah' : 'Madaniyyah';
                     surahGrid.innerHTML += `
-                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between hover:shadow-xl hover:border-emerald-500 border-2 border-transparent transition-all cursor-pointer" data-surah-nomor="${surah.nomor}">
-                            <div class="flex items-center"><span class="flex items-center justify-center w-10 h-10 mr-4 text-emerald-600 bg-emerald-100 rounded-md font-bold">${surah.nomor}</span><div><p class="font-bold text-slate-800">${surah.nama_latin}</p><p class="text-sm text-slate-500">${surah.arti} - ${surah.jumlah_ayat} Ayat</p></div></div><p class="text-2xl font-arabic text-emerald-600">${surah.nama}</p>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between hover:shadow-xl hover:border-emerald-500 border-2 border-transparent transition-all cursor-pointer group" data-surah-nomor="${surah.nomor}">
+                            <div class="flex items-center">
+                                <span class="flex items-center justify-center w-10 h-10 mr-4 text-emerald-600 bg-emerald-100 rounded-md font-bold">${surah.nomor}</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">${surah.nama_latin}</h3>
+                                    <p class="text-sm text-slate-500">${surah.arti} • ${surah.jumlah_ayat} Ayat • ${tempat}</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-arabic text-slate-700">${surah.nama}</div>
                         </div>`;
                 });
-            }
-            
-            function renderSurahReader(nomorSurah) {
-                const surahInfo = daftarSurahLengkap.find(s => s.nomor == nomorSurah);
-                const surahData = dataAyatSurah[nomorSurah];
 
-                if (!surahData) {
-                    surahReaderView.innerHTML = `<div class="text-center p-8"><h2 class="text-2xl font-bold mb-2">${surahInfo.nama_latin}</h2><p class="text-slate-600">Mohon maaf, data audio dan ayat untuk surah ini belum tersedia dalam demo.</p><button id="back-to-list-btn" class="mt-6 bg-emerald-500 text-white px-6 py-2 rounded-lg hover:bg-emerald-600 transition">Kembali</button></div>`;
+                // Hide loading, show grid
+                loadingState.classList.add('hidden');
+                surahGrid.classList.remove('hidden');
+            }
+
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                if (query === '') {
+                    renderSurahList();
                     return;
                 }
+
+                const filtered = quranManager.getSurahList().filter(surah => 
+                    surah.nama_latin.toLowerCase().includes(query) ||
+                    surah.nama.includes(query) ||
+                    surah.arti.toLowerCase().includes(query) ||
+                    surah.nomor.toString().includes(query)
+                );
+                renderSurahList(filtered);
+            });
+
+            // Render surah reader
+            async function renderSurahReader(nomorSurah) {
+                const surahInfo = quranManager.getSurahList().find(s => s.nomor == nomorSurah);
                 
+                // Show loading state
+                surahReaderView.innerHTML = `
+                    <div class="max-w-4xl mx-auto">
+                        <div class="text-center mb-8 p-6 bg-white rounded-xl shadow-lg">
+                            <div class="loading-shimmer h-8 w-64 mx-auto mb-4 rounded"></div>
+                            <div class="loading-shimmer h-6 w-48 mx-auto rounded"></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-8">
+                            <div class="space-y-6">
+                                <div class="loading-shimmer h-16 w-full rounded"></div>
+                                <div class="loading-shimmer h-16 w-full rounded"></div>
+                                <div class="loading-shimmer h-16 w-full rounded"></div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                lucide.createIcons();
+
+                // Load actual data
+                const surahData = await quranManager.loadSurahData(nomorSurah);
+                
+                if (surahData.error) {
+                    surahReaderView.innerHTML = `
+                        <div class="max-w-4xl mx-auto text-center p-8">
+                            <button id="back-to-list-btn" class="mb-4 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors">
+                                <i data-lucide="arrow-left" class="w-4 h-4 inline mr-2"></i>Kembali
+                            </button>
+                            <h2 class="text-2xl font-bold mb-4">${surahInfo.nama_latin}</h2>
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                <i data-lucide="alert-triangle" class="w-8 h-8 text-yellow-500 mx-auto mb-4"></i>
+                                <p class="text-yellow-800">Mohon maaf, data lengkap surah ini belum tersedia.</p>
+                                <p class="text-sm text-yellow-600 mt-2">Audio tetap dapat diputar.</p>
+                            </div>
+                        </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Generate ayat HTML with tafsir
                 let ayatHtml = surahData.ayat.map(ayat => `
-                    <div class="py-6 border-b border-slate-200"><div class="flex justify-between items-center mb-4"><span class="flex items-center justify-center w-8 h-8 text-emerald-600 bg-emerald-100 rounded-full font-bold text-sm">${ayat.nomor}</span></div><p class="text-right text-3xl font-arabic leading-loose text-slate-800 mb-4" dir="rtl">${ayat.teks_arab}</p><p class="text-slate-600 text-base leading-relaxed">${ayat.teks_indonesia}</p></div>`).join('');
+                    <div class="py-6 border-b border-slate-200 last:border-b-0">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="flex items-center justify-center w-8 h-8 text-emerald-600 bg-emerald-100 rounded-full text-sm font-bold">${ayat.nomor}</span>
+                        </div>
+                        <div class="text-3xl font-arabic text-right leading-loose text-slate-800 mb-4">${ayat.teks_arab}</div>
+                        <div class="text-slate-700 text-lg leading-relaxed mb-3">${ayat.teks_indonesia}</div>
+                        ${ayat.tafsir ? `
+                            <details class="mt-4">
+                                <summary class="cursor-pointer text-emerald-600 hover:text-emerald-700 font-medium">
+                                    <i data-lucide="book-open" class="w-4 h-4 inline mr-1"></i>Tafsir
+                                </summary>
+                                <div class="mt-3 p-4 bg-slate-50 rounded-lg text-sm text-slate-600 leading-relaxed">
+                                    ${ayat.tafsir}
+                                </div>
+                            </details>
+                        ` : ''}
+                    </div>
+                `).join('');
 
                 surahReaderView.innerHTML = `
                     <div class="max-w-4xl mx-auto">
                         <div class="relative text-center mb-8 p-6 bg-white rounded-xl shadow-lg">
-                            <button id="back-to-list-btn" class="absolute top-5 left-5 text-slate-500 hover:text-emerald-500 transition-colors" aria-label="Kembali ke daftar surah"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                            <button id="back-to-list-btn" class="absolute top-5 left-5 text-slate-500 hover:text-emerald-500 transition-colors" aria-label="Kembali ke daftar surah">
+                                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                            </button>
                             <div class="flex justify-center items-center gap-4">
-                               <h2 class="text-3xl font-bold text-emerald-600">${surahInfo.nama_latin}</h2>
-                               <button id="audio-player-btn" data-surah-nomor="${nomorSurah}" class="w-12 h-12 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition" aria-label="Putar Audio Surah"><i data-lucide="play" class="w-6 h-6"></i></button>
+                                <h2 class="text-3xl font-bold text-emerald-600">${surahInfo.nama_latin}</h2>
+                                <button id="audio-player-btn" data-surah-nomor="${nomorSurah}" class="w-12 h-12 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-all">
+                                    <i data-lucide="play" class="w-6 h-6"></i>
+                                </button>
                             </div>
                             <p class="text-4xl font-arabic mt-2 text-slate-800">${surahInfo.nama}</p>
-                            <p class="text-slate-500 mt-2">${surahInfo.arti} &bull; ${surahInfo.jumlah_ayat} Ayat</p>
+                            <p class="text-slate-500 mt-2">${surahInfo.arti} • ${surahInfo.jumlah_ayat} Ayat</p>
                         </div>
-                        ${nomorSurah != 9 && nomorSurah != 1 ? `<div class="text-center py-6 font-arabic text-3xl text-slate-800">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>` : ''}
+                        ${nomorSurah != 9 && nomorSurah != 1 ? `
+                            <div class="text-center py-6 font-arabic text-3xl text-slate-800">
+                                بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+                            </div>
+                        ` : ''}
                         <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">${ayatHtml}</div>
                     </div>`;
+                
                 lucide.createIcons();
             }
 
+            // Navigation functions
             function switchToReaderView(nomorSurah) {
-                renderSurahReader(nomorSurah);
                 surahListView.classList.add('hidden');
                 surahReaderView.classList.remove('hidden');
+                renderSurahReader(nomorSurah);
                 window.scrollTo(0, 0);
             }
 
             function switchToListView() {
-                // Hentikan audio jika sedang diputar saat kembali
                 if (!audioPlayer.paused) {
                     audioPlayer.pause();
                 }
@@ -141,23 +260,21 @@
                 surahListView.classList.remove('hidden');
             }
 
-            // --- AUDIO PLAYER LOGIC ---
+            // Audio player functionality
             function handleAudioPlay(button, nomorSurah) {
-                const surahData = dataAyatSurah[nomorSurah];
                 const icon = button.querySelector('i');
 
                 if (currentPlayingSurah === nomorSurah && !audioPlayer.paused) {
-                    // Jika surah yang sama sedang diputar, jeda
                     audioPlayer.pause();
                 } else {
-                    // Jika surah lain diputar, atau audio di-pause
-                    audioPlayer.src = surahData.audio_full;
+                    const audioUrl = `https://server7.mp3quran.net/s_gmd/${nomorSurah.toString().padStart(3, '0')}.mp3`;
+                    audioPlayer.src = audioUrl;
                     audioPlayer.play();
                     currentPlayingSurah = nomorSurah;
                 }
             }
 
-            // Event listeners untuk audio player
+            // Audio event listeners
             audioPlayer.addEventListener('play', () => {
                 const btn = document.getElementById('audio-player-btn');
                 if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
@@ -168,7 +285,7 @@
 
             audioPlayer.addEventListener('pause', () => {
                 const btn = document.getElementById('audio-player-btn');
-                 if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
+                if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
                     btn.innerHTML = `<i data-lucide="play" class="w-6 h-6"></i>`;
                     lucide.createIcons();
                 }
@@ -176,7 +293,7 @@
 
             audioPlayer.addEventListener('ended', () => {
                 const btn = document.getElementById('audio-player-btn');
-                 if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
+                if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
                     btn.innerHTML = `<i data-lucide="play" class="w-6 h-6"></i>`;
                     lucide.createIcons();
                     currentPlayingSurah = null;
@@ -185,14 +302,13 @@
 
             audioPlayer.addEventListener('waiting', () => {
                 const btn = document.getElementById('audio-player-btn');
-                 if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
+                if (btn && btn.dataset.surahNomor == currentPlayingSurah) {
                     btn.innerHTML = `<i data-lucide="loader-circle" class="w-6 h-6 animate-spin"></i>`;
                     lucide.createIcons();
                 }
             });
 
-
-            // --- EVENT LISTENERS UTAMA ---
+            // Event listeners
             surahGrid.addEventListener('click', e => {
                 const card = e.target.closest('[data-surah-nomor]');
                 if (card) switchToReaderView(card.dataset.surahNomor);
@@ -204,15 +320,10 @@
                 if (backBtn) switchToListView();
                 if (audioBtn) handleAudioPlay(audioBtn, audioBtn.dataset.surahNomor);
             });
-            
-            // --- INISIALISASI & LOGIKA BERSAMA ---
+
+            // Initialize
             lucide.createIcons();
             renderSurahList();
-            
-            const activeLink = document.querySelector(`.nav-link[data-page="alquran"]`);
-            if (activeLink) {
-                 // Tidak perlu mengubah style karena tombol tengah sudah aktif secara default
-            }
         });
     </script>
 </body>

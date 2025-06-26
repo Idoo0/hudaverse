@@ -3,69 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Kisah - HidayahPath</title>
+    <title>Streak Al-Quran - HidayahPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { emerald: { 500: '#10b981', 600: '#059669' }, slate: { 100: '#f1f5f9', 800: '#1e293b' } },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['Scheherazade New', 'serif']
+                    },
+                    colors: { 
+                        emerald: { 500: '#10b981', 600: '#059669' }, 
+                        slate: { 100: '#f1f5f9', 800: '#1e293b', 900: '#0f172a' } 
+                    },
                 }
             }
         }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .font-arabic { font-family: 'Scheherazade New', serif; }
+        .recording-pulse {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .verification-success {
+            background: linear-gradient(45deg, #10b981, #059669);
+        }
+        .verification-fail {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased">
 
-    <main class="py-12 md:py-20">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-bold text-slate-800">Studio Kisah</h1>
-                <p class="mt-2 text-lg text-slate-600">Kumpulan cerita penuh hikmah dari Al-Qur'an, Hadits, dan sejarah Islam.</p>
-            </div>
+    <main class="py-12 md:py-16 min-h-[calc(100vh-180px)]">
+        <div class="container mx-auto px-4 md:px-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden group">
-                    <img src="https://images.unsplash.com/photo-1604589410113-c39cf01211de?q=80&w=1932&auto=format&fit=crop" alt="Kisah Nabi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="p-5">
-                        <p class="text-sm font-semibold text-emerald-600 mb-1">Kisah Nabi</p>
-                        <h3 class="text-lg font-bold mb-2 text-slate-800">Kesabaran Nabi Ayyub A.S.</h3>
-                        <p class="text-slate-600 text-sm mb-4">Belajar tentang ketabahan tak terbatas dari ujian yang menimpa Nabi Ayyub...</p>
-                        <a href="#" class="font-semibold text-emerald-600 hover:text-emerald-700">Baca Selengkapnya &rarr;</a>
+            <!-- Main Menu -->
+            <div id="main-menu" class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-slate-800 mb-4">Streak Al-Quran</h1>
+                <p class="text-lg text-slate-600 mb-8">Bangun kebiasaan membaca Al-Quran setiap hari</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <!-- Personal Streak -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer" onclick="showPersonalStreak()">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="user" class="w-8 h-8 text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Personal Streak</h3>
+                            <p class="text-slate-600">Tantang diri sendiri dengan bacaan harian</p>
+                            <div class="mt-4 text-sm text-emerald-600 font-semibold">
+                                <span id="personal-streak-count">0</span> hari berturut-turut
+                            </div>
+                        </div>
                     </div>
-                </div>
-                 <div class="bg-white rounded-lg shadow-md overflow-hidden group">
-                    <img src="https://images.unsplash.com/photo-1585590989578-ce355498885e?q=80&w=1964&auto=format&fit=crop" alt="Sahabat Nabi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="p-5">
-                        <p class="text-sm font-semibold text-emerald-600 mb-1">Sahabat Nabi</p>
-                        <h3 class="text-lg font-bold mb-2 text-slate-800">Kedermawanan Abdurrahman bin Auf</h3>
-                        <p class="text-slate-600 text-sm mb-4">Bagaimana seorang sahabat menafkahkan hartanya di jalan Allah hingga...</p>
-                        <a href="#" class="font-semibold text-emerald-600 hover:text-emerald-700">Baca Selengkapnya &rarr;</a>
+
+                    <!-- Group Streak -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer" onclick="showGroupStreak()">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="users" class="w-8 h-8 text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Group Streak</h3>
+                            <p class="text-slate-600">Bersama teman dalam komitmen membaca</p>
+                            <div class="mt-4 text-sm text-blue-600 font-semibold">
+                                <span id="group-count">0</span> grup aktif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Personal Streak View -->
+            <div id="personal-streak-view" class="hidden">
+                <div class="max-w-2xl mx-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="showMainMenu()" class="flex items-center text-slate-600 hover:text-emerald-600 transition-colors">
+                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                            Kembali
+                        </button>
+                        <h2 class="text-2xl font-bold text-slate-800">Personal Streak</h2>
+                        <div></div>
+                    </div>
+
+                    <!-- Streak Stats -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-emerald-600" id="current-streak">0</div>
+                                <div class="text-sm text-slate-600">Streak Saat Ini</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600" id="longest-streak">0</div>
+                                <div class="text-sm text-slate-600">Streak Terpanjang</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600" id="total-days">0</div>
+                                <div class="text-sm text-slate-600">Total Hari</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Challenge -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Tantangan Hari Ini</h3>
+                        
+                        <!-- Bot Message -->
+                        <div class="bg-slate-50 rounded-lg p-4 mb-6">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                                    <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-semibold text-slate-800">Bot Hafalan</div>
+                                    <div class="text-slate-600 mt-1" id="bot-message">
+                                        Assalamu'alaikum! Mari kita mulai hari ini dengan membaca ayat pilihan Allah untuk Anda.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Verse -->
+                        <div id="daily-verse-container" class="hidden">
+                            <div class="text-center mb-6">
+                                <div class="text-sm text-slate-600 mb-2">
+                                    <span id="verse-reference">QS. Al-Fatihah (1): 1</span>
+                                </div>
+                                <div class="text-2xl font-arabic text-slate-800 leading-loose mb-4" id="verse-arabic">
+                                    بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+                                </div>
+                                <div class="text-slate-600 italic" id="verse-translation">
+                                    "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."
+                                </div>
+                            </div>
+
+                            <!-- Voice Recording -->
+                            <div class="text-center mb-6">
+                                <button id="record-btn" onclick="toggleRecording()" 
+                                        class="w-20 h-20 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center transition-all transform hover:scale-105">
+                                    <i data-lucide="mic" class="w-8 h-8"></i>
+                                </button>
+                                <div class="mt-2 text-sm text-slate-600">
+                                    <span id="record-status">Tekan untuk merekam bacaan Anda</span>
+                                </div>
+                            </div>
+
+                            <!-- Verification Result -->
+                            <div id="verification-result" class="hidden p-4 rounded-lg text-center text-white">
+                                <div class="text-lg font-semibold" id="verification-title"></div>
+                                <div class="text-sm mt-2" id="verification-message"></div>
+                                <div class="mt-4">
+                                    <button id="complete-streak-btn" onclick="completePersonalStreak()" 
+                                            class="hidden bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-2 rounded-lg transition-all">
+                                        Selesaikan Streak Hari Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Load Today's Verse Button -->
+                        <div id="load-verse-btn" class="text-center">
+                            <button onclick="loadTodaysVerse()" 
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg transition-all">
+                                Muat Ayat Hari Ini
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Streak View -->
+            <div id="group-streak-view" class="hidden">
+                <div class="max-w-4xl mx-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="showMainMenu()" class="flex items-center text-slate-600 hover:text-emerald-600 transition-colors">
+                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                            Kembali
+                        </button>
+                        <h2 class="text-2xl font-bold text-slate-800">Group Streak</h2>
+                        <button onclick="showCreateGroup()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-all">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                            Buat Grup
+                        </button>
+                    </div>
+
+                    <!-- Groups List -->
+                    <div id="groups-list" class="space-y-4">
+                        <div class="text-center py-8 text-slate-500">
+                            <i data-lucide="users" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                            <p>Belum ada grup. Buat grup pertama Anda!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Group Modal -->
+            <div id="create-group-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Buat Grup Baru</h3>
+                    <form onsubmit="createNewGroup(event)">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Grup</label>
+                            <input type="text" id="group-name" required 
+                                   class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Undang Teman (Opsional)</label>
+                            <input type="text" id="group-members" placeholder="Masukkan username, pisahkan dengan koma"
+                                   class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="button" onclick="hideCreateGroup()" 
+                                    class="flex-1 px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50">
+                                Batal
+                            </button>
+                            <button type="submit" 
+                                    class="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600">
+                                Buat Grup
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <div class="h-28"></div>
-    <footer class="bg-slate-800 text-slate-400 py-8 text-center"><p>&copy; 2025 HidayahPath. All Rights Reserved.</p></footer>
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center"><p>&copy; 2025 HidayahPath. All Rights Reserved.</p></footer>
     <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm shadow-xl rounded-full transition-all duration-300 z-50">
         <div class="flex justify-around items-center h-16 px-4 py-2 gap-2 md:gap-4">
             <a href="beranda.html" data-page="beranda" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="home" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Beranda</span></a>
             <a href="fahmi.html" data-page="fahmi" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="message-circle-question" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Fahmi</span></a>
-            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all"><i data-lucide="book-open" class="w-8 h-8"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Qur'an</span></a>
+            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all"><i data-lucide="book-open" class="w-8 h-8"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Al-Qur'an</span></a>
             <a href="hasanah.html" data-page="hasanah" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="sparkles" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Hasanah</span></a>
-            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="film" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Studio</span></a>
+            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="film" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Streak</span></a>
         </div>
     </nav>
+
+    <!-- Load Streak Manager -->
+    <script src="js/streak-manager.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Global variables
+        let streakManager;
+        let currentView = 'main';
+        let isRecording = false;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
+            
+            // Initialize streak manager
+            streakManager = new StreakManager();
+            
+            // Load initial data
+            updateMainMenuStats();
+            
+            // Navigation
+            setupNavigation();
+        });
+
+        // Setup navigation
+        function setupNavigation() {
             document.querySelectorAll('.nav-link').forEach(link => {
                 const tooltip = link.querySelector('.tooltip');
                 if (tooltip) {
@@ -73,15 +284,274 @@
                     link.addEventListener('mouseleave', () => { if (window.innerWidth >= 768) tooltip.classList.add('hidden'); });
                 }
             });
+            
             const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
             const activeLink = document.querySelector(`.nav-link[data-page="${currentPage}"]`);
-            if (activeLink) {
-                if (currentPage !== 'alquran') {
-                    activeLink.classList.remove('text-slate-500');
-                    activeLink.classList.add('text-emerald-500');
-                }
+            if (activeLink && currentPage !== 'alquran') {
+                activeLink.classList.remove('text-slate-500');
+                activeLink.classList.add('text-emerald-500');
             }
-        });
+        }
+
+        // Update main menu statistics
+        function updateMainMenuStats() {
+            const personalStats = streakManager.getStreakStats(true);
+            const userGroups = streakManager.getUserGroups();
+            
+            document.getElementById('personal-streak-count').textContent = personalStats.currentStreak;
+            document.getElementById('group-count').textContent = userGroups.length;
+        }
+
+        // Show main menu
+        function showMainMenu() {
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('personal-streak-view').classList.add('hidden');
+            document.getElementById('group-streak-view').classList.add('hidden');
+            currentView = 'main';
+            updateMainMenuStats();
+        }
+
+        // Show personal streak
+        function showPersonalStreak() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('personal-streak-view').classList.remove('hidden');
+            currentView = 'personal';
+            updatePersonalStreakStats();
+        }
+
+        // Show group streak
+        function showGroupStreak() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('group-streak-view').classList.remove('hidden');
+            currentView = 'group';
+            loadUserGroups();
+        }
+
+        // Update personal streak statistics
+        function updatePersonalStreakStats() {
+            const stats = streakManager.getStreakStats(true);
+            document.getElementById('current-streak').textContent = stats.currentStreak;
+            document.getElementById('longest-streak').textContent = stats.longestStreak;
+            document.getElementById('total-days').textContent = stats.totalDays;
+        }
+
+        // Load today's verse
+        async function loadTodaysVerse() {
+            document.getElementById('load-verse-btn').classList.add('hidden');
+            document.getElementById('bot-message').textContent = 'Sedang memuat ayat pilihan untuk Anda...';
+            
+            try {
+                const verse = await streakManager.getDailyVerse();
+                
+                // Update bot message
+                document.getElementById('bot-message').innerHTML = `
+                    Alhamdulillah! Ini adalah ayat pilihan Allah untuk Anda hari ini. 
+                    Mari kita baca bersama dan resapi maknanya. Rekam bacaan Anda dengan menekan tombol mikrofon di bawah.
+                `;
+                
+                // Update verse display
+                document.getElementById('verse-reference').textContent = 
+                    `QS. ${verse.surah.name_latin} (${verse.surah.number}): ${verse.ayat.number}`;
+                document.getElementById('verse-arabic').textContent = verse.ayat.arabic;
+                document.getElementById('verse-translation').textContent = `"${verse.ayat.translation}"`;
+                
+                // Show verse container
+                document.getElementById('daily-verse-container').classList.remove('hidden');
+                
+            } catch (error) {
+                document.getElementById('bot-message').textContent = 
+                    'Maaf, terjadi kesalahan saat memuat ayat. Silakan coba lagi.';
+                document.getElementById('load-verse-btn').classList.remove('hidden');
+            }
+        }
+
+        // Helper function to update record button
+        function updateRecordButton(iconName, statusText, isRecording = false, isLoading = false) {
+            const recordBtn = document.getElementById('record-btn');
+            const recordStatus = document.getElementById('record-status');
+            
+            if (!recordBtn || !recordStatus) return;
+            
+            // Update button classes
+            recordBtn.className = `w-20 h-20 text-white rounded-full flex items-center justify-center transition-all transform hover:scale-105 ${
+                isRecording ? 'recording-pulse bg-red-500' : 
+                isLoading ? 'bg-yellow-500' : 
+                'bg-emerald-500 hover:bg-emerald-600'
+            }`;
+            
+            // Update icon
+            const iconElement = recordBtn.querySelector('i');
+            if (iconElement) {
+                iconElement.setAttribute('data-lucide', iconName);
+                iconElement.className = `w-8 h-8 ${isLoading ? 'animate-spin' : ''}`;
+            }
+            
+            // Update status text
+            recordStatus.textContent = statusText;
+            
+            // Re-render icons
+            lucide.createIcons();
+        }
+
+        // Toggle recording - FIXED VERSION
+        // Di dalam studio.html, update bagian toggleRecording
+async function toggleRecording() {
+    if (!isRecording) {
+        // Start recording
+        const success = await streakManager.startRecording();
+        if (success) {
+            isRecording = true;
+            updateRecordButton('square', 'Sedang merekam... Tekan untuk berhenti', true);
+        } else {
+            updateRecordButton('mic', 'Gagal mengakses mikrofon. Pastikan izin diberikan.');
+        }
+    } else {
+        // Stop recording
+        streakManager.stopRecording();
+        isRecording = false;
+        updateRecordButton('loader-circle', 'Memverifikasi bacaan Anda...', false, true);
+        
+        // Wait a bit for the recording to be processed
+        setTimeout(async () => {
+            try {
+                // Verify the actual recorded audio
+                const result = await streakManager.verifyRecitation();
+                showVerificationResult(result);
+                updateRecordButton('mic', 'Tekan untuk merekam bacaan Anda');
+            } catch (error) {
+                console.error('Verification error:', error);
+                showVerificationResult({
+                    success: false,
+                    confidence: 0,
+                    feedback: 'Terjadi kesalahan saat memverifikasi. Silakan coba lagi.'
+                });
+                updateRecordButton('mic', 'Tekan untuk merekam bacaan Anda');
+            }
+        }, 1000); // Give some time for the recording to finish processing
+    }
+}
+
+        // Show verification result
+        function showVerificationResult(result) {
+            const resultDiv = document.getElementById('verification-result');
+            const title = document.getElementById('verification-title');
+            const message = document.getElementById('verification-message');
+            const completeBtn = document.getElementById('complete-streak-btn');
+
+            if (!resultDiv || !title || !message || !completeBtn) return;
+
+            if (result.success) {
+                resultDiv.className = 'p-4 rounded-lg text-center text-white verification-success';
+                title.textContent = `Alhamdulillah! (${result.confidence}% akurat)`;
+                message.textContent = result.feedback;
+                completeBtn.classList.remove('hidden');
+            } else {
+                resultDiv.className = 'p-4 rounded-lg text-center text-white verification-fail';
+                title.textContent = 'Coba Lagi';
+                message.textContent = result.feedback;
+                completeBtn.classList.add('hidden');
+            }
+
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Complete personal streak
+        async function completePersonalStreak() {
+            await streakManager.completeDailyStreak(true);
+            
+            // Show success message
+            const resultDiv = document.getElementById('verification-result');
+            if (resultDiv) {
+                resultDiv.className = 'p-4 rounded-lg text-center text-white verification-success';
+                resultDiv.innerHTML = `
+                    <div class="text-lg font-semibold">🎉 Streak Berhasil!</div>
+                    <div class="text-sm mt-2">Anda telah menyelesaikan tantangan hari ini. Sampai jumpa besok!</div>
+                    <div class="mt-4">
+                        <button onclick="showMainMenu()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-2 rounded-lg transition-all">
+                            Kembali ke Menu
+                        </button>
+                    </div>
+                `;
+            }
+            
+            updatePersonalStreakStats();
+        }
+
+        // Show create group modal
+        function showCreateGroup() {
+            document.getElementById('create-group-modal').classList.remove('hidden');
+        }
+
+        // Hide create group modal
+        function hideCreateGroup() {
+            document.getElementById('create-group-modal').classList.add('hidden');
+            document.getElementById('group-name').value = '';
+            document.getElementById('group-members').value = '';
+        }
+
+        // Create new group
+        function createNewGroup(event) {
+            event.preventDefault();
+            
+            const groupName = document.getElementById('group-name').value.trim();
+            const membersInput = document.getElementById('group-members').value.trim();
+            const members = membersInput ? membersInput.split(',').map(m => m.trim()).filter(m => m) : [];
+            
+            if (groupName) {
+                const groupId = streakManager.createGroup(groupName, members);
+                hideCreateGroup();
+                loadUserGroups();
+                
+                // Show success message
+                alert(`Grup "${groupName}" berhasil dibuat!`);
+            }
+        }
+
+        // Load user groups
+        function loadUserGroups() {
+            const groupsList = document.getElementById('groups-list');
+            if (!groupsList) return;
+            
+            const userGroups = streakManager.getUserGroups();
+            
+            if (userGroups.length === 0) {
+                groupsList.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                        <p>Belum ada grup. Buat grup pertama Anda!</p>
+                    </div>
+                `;
+            } else {
+                groupsList.innerHTML = userGroups.map(group => `
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-slate-800">${group.name}</h3>
+                            <div class="text-sm text-slate-600">${group.members.length} anggota</div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-emerald-600">${group.currentStreak}</div>
+                                <div class="text-sm text-slate-600">Streak Grup</div>
+                            </div>
+                            <button onclick="openGroupChat('${group.id}')" 
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-all">
+                                Buka Grup
+                            </button>
+                        </div>
+                        <div class="mt-4 text-sm text-slate-600">
+                            Completed today: ${group.completedToday.length}/${group.members.length}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Open group chat (placeholder)
+        function openGroupChat(groupId) {
+            alert(`Fitur chat grup akan segera hadir! Group ID: ${groupId}`);
+        }
     </script>
 </body>
 </html>

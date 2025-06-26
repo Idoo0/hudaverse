@@ -2,8 +2,8 @@
 class StreakManager {
     constructor() {
         this.currentUser = 'Idoo0'; // Dari GitHub login
-        this.apiEndpoint = 'http://127.0.0.1:5000/api';
-        this.geminiApiKey = 'YOUR_GEMINI_API_KEY'; // Ganti dengan API key Gemini
+        this.apiEndpoint = 'http://127.0.0.1:5000/api/streak';
+        this.geminiApiKey = 'AIzaSyDP0pV_WldmEXII9PM5qgMDbsajTM3RSLk'; // Ganti dengan API key Gemini
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.isRecording = false;

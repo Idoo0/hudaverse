@@ -7,6 +7,7 @@ import google.generativeai as genai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+from streak_api import streak_bp
 
 load_dotenv()
 app = Flask(__name__)
@@ -16,6 +17,9 @@ try:
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 except Exception as e:
     print(f"Error konfigurasi Gemini API: {e}")
+
+
+app.register_blueprint(streak_bp, url_prefix='/api/streak')
 
 # =====================================================================
 # BAGIAN CHATBOT FAHMI (TIDAK ADA PERUBAHAN)

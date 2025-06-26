@@ -10,130 +10,709 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { emerald: { 500: '#10b981', 600: '#059669' }, slate: { 100: '#f1f5f9', 800: '#1e293b' } },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['Scheherazade New', 'serif']
+                    },
+                    colors: { 
+                        emerald: { 500: '#10b981', 600: '#059669' }, 
+                        slate: { 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a' } 
+                    },
                 }
             }
         }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        #verse-arabic { font-family: 'Scheherazade New', serif; font-size: 1.75rem; line-height: 2.5rem; }
+        .font-arabic { font-family: 'Scheherazade New', serif; }
+        .bg-gradient-islamic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .bg-gradient-verse {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="mosque" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10 2L15 8H5L10 2ZM2 10L8 15V20H12V15L18 10H2Z" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23mosque)"/></svg>');
+            background-size: cover;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        .card-shadow-light {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .like-button:hover {
+            transform: scale(1.1);
+        }
+        .progress-circle {
+            background: conic-gradient(#10b981 0deg, #10b981 var(--progress, 0deg), #e2e8f0 var(--progress, 0deg));
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            position: relative;
+        }
+        .status-dot::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: #10b981;
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+        }
+        .status-dot-completed {
+            background: #10b981;
+        }
+        .status-dot-pending {
+            background: #cbd5e1;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .modal-enter {
+            animation: modalEnter 0.3s ease-out;
+        }
+        .modal-exit {
+            animation: modalExit 0.3s ease-in;
+        }
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        @keyframes modalExit {
+            from {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+        }
+        .completed-card {
+            opacity: 0.6;
+            position: relative;
+        }
+        .completed-card::after {
+            content: '✓';
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
 
-    <main>
-        <section id="home" class="h-screen min-h-[700px] relative flex flex-col items-center justify-center text-center text-white p-4">
-            <div class="absolute inset-0 z-0">
-                <img src="latarbelakang.jpg" alt="Latar Belakang Masjid" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-black/60"></div>
+    <!-- Header -->
+    <header class="bg-white shadow-sm px-4 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <h1 class="text-xl font-bold border-b-2 border-emerald-500 pb-1 text-slate-800">Today</h1>
+                <!-- <h2 class="text-xl text-slate-500">Community</h2> -->
             </div>
-            <div class="relative z-10 flex flex-col items-center">
-                <h1 class="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg">Temukan Hidayah di Setiap Langkahmu</h1>
-                <p class="mt-4 max-w-2xl text-lg md:text-xl text-slate-200">Kompas digital Anda untuk menjalani hidup sesuai tuntunan Al-Qur'an dan Sunnah.</p>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1">
+                    <i data-lucide="zap" class="w-5 h-5 text-yellow-500"></i>
+                    <span class="text-yellow-600 font-semibold" id="streak-count">1</span>
+                </div>
+                <!-- <i data-lucide="bell" class="w-6 h-6 text-slate-400"></i> -->
+                <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">A</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-6 pb-28">
+        
+        <!-- Verse of the Day -->
+        <div class="bg-gradient-verse rounded-2xl p-6 mb-6 card-shadow relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="islamic-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <circle cx="10" cy="10" r="2" fill="white" opacity="0.3"/>
+                            <path d="M5 5 L15 15 M15 5 L5 15" stroke="white" stroke-width="0.5" opacity="0.2"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100" height="100" fill="url(#islamic-pattern)"/>
+                </svg>
+            </div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center space-x-2 mb-4">
+                    <div class="status-dot status-dot-completed"></div>
+                    <h3 class="text-white/90 font-medium">Verse of the Day</h3>
+                </div>
                 
-                <div class="mt-8 w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 text-white">
-                    <div class="p-6 md:p-8">
-                        
-                        <p id="verse-arabic" class="font-bold text-center mb-3"></p>
-                        <p id="verse-translation" class="text-slate-200 italic text-center mb-4"></p>
-                        <p id="verse-reference" class="text-sm text-emerald-300 font-semibold text-center"></p>
+                <div class="mb-4">
+                    <h4 class="text-white font-bold text-lg mb-2" id="verse-reference">QS. Al-Fatihah (1): 1</h4>
+                    
+                    <!-- Arabic Text -->
+                    <div class="text-white/95 font-arabic text-2xl leading-relaxed mb-4 text-center" id="verse-arabic">
+                        بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
                     </div>
-                    <div class="flex justify-between items-center bg-black/20 rounded-b-2xl px-4 py-2">
-                        <button id="prev-verse" class="p-2 rounded-full hover:bg-white/20 transition-colors duration-200" aria-label="Ayat Sebelumnya"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                        <p class="text-xs font-medium uppercase tracking-wider">Ayat Hari Ini</p>
-                        <button id="next-verse" class="p-2 rounded-full hover:bg-white/20 transition-colors duration-200" aria-label="Ayat Berikutnya"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
-                    </div>
+                    
+                    <!-- Translation -->
+                    <p class="text-white/90 text-lg leading-relaxed italic text-center" id="verse-translation">
+                        "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."
+                    </p>
                 </div>
-            </div>
-        </section>
 
-        <section id="features" class="py-20 bg-slate-100">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-slate-800">Jelajahi Fitur Unggulan Kami</h2>
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between mt-8">
+                    <div class="flex items-center justify-center space-x-8">
+                        <!-- Like Button -->
+                        <button id="like-btn" onclick="toggleLike()" class="like-button flex flex-col items-center space-y-1 transition-transform">
+                            <i data-lucide="heart" class="w-6 h-6 text-white/80 hover:text-red-400"></i>
+                            <span class="text-white/70 text-sm font-medium" id="like-count">136.5k</span>
+                        </button>
+                        
+                        <!-- Share Button -->
+                        <button onclick="shareVerse()" class="like-button flex flex-col items-center space-y-1 transition-transform">
+                            <i data-lucide="share" class="w-6 h-6 text-white/80 hover:text-blue-400"></i>
+                            <span class="text-white/70 text-sm font-medium">41,372</span>
+                        </button>
+                        
+                        <!-- More Options -->
+                        <!-- <button onclick="showMoreOptions()" class="like-button flex flex-col items-center space-y-1 transition-transform">
+                            <i data-lucide="more-horizontal" class="w-6 h-6 text-white/80"></i>
+                            <span class="text-white/70 text-sm font-medium">More</span>
+                        </button> -->
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="bg-white p-6 rounded-xl shadow-lg text-center"> <i data-lucide="message-circle-question" class="w-10 h-10 text-emerald-500 mx-auto mb-4"></i> <h3 class="text-xl font-bold mb-2">Fahmi (AI Mufti)</h3> </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg text-center"> <i data-lucide="sparkles" class="w-10 h-10 text-emerald-500 mx-auto mb-4"></i> <h3 class="text-xl font-bold mb-2">Hasanah (Misi Harian)</h3> </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg text-center"> <i data-lucide="film" class="w-10 h-10 text-emerald-500 mx-auto mb-4"></i> <h3 class="text-xl font-bold mb-2">Studio Kisah</h3> </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg text-center"> <i data-lucide="book-open-check" class="w-10 h-10 text-emerald-500 mx-auto mb-4"></i> <h3 class="text-xl font-bold mb-2">Al-Qur'an Digital</h3> </div>
+
+                <!-- Notification Banner -->
+                <!-- <div class="mt-6 bg-black/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="bell" class="w-4 h-4 text-white/70"></i>
+                        <span class="text-white/80 text-sm">Send Me This Daily</span>
+                    </div>
+                    <button onclick="toggleDailyNotification()" class="text-white/60 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Guided Content -->
+        <div class="space-y-4">
+            
+            <!-- Renungan (Guided Scripture) -->
+            <div id="renungan-card" onclick="openActivityModal('renungan')" class="bg-white rounded-xl p-4 flex items-center space-x-4 card-shadow-light border border-slate-200 cursor-pointer hover:shadow-lg transition-all">
+                <div class="status-dot status-dot-pending" id="renungan-dot"></div>
+                <div class="flex-1">
+                    <div class="text-slate-500 text-sm mb-1">Renungan Harian</div>
+                    <h3 class="text-slate-800 font-semibold text-lg mb-1">Hikmah dari Ayat Hari Ini</h3>
+                    <div class="flex items-center space-x-2 text-slate-500 text-sm">
+                        <i data-lucide="play" class="w-3 h-3"></i>
+                        <span>2-5 min</span>
+                    </div>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="book-open" class="w-8 h-8 text-white"></i>
                 </div>
             </div>
-        </section>
+
+            <!-- Dzikir (Guided Prayer) -->
+            <div id="dzikir-card" onclick="openActivityModal('dzikir')" class="bg-white rounded-xl p-4 flex items-center space-x-4 card-shadow-light border border-slate-200 cursor-pointer hover:shadow-lg transition-all">
+                <div class="status-dot status-dot-pending" id="dzikir-dot"></div>
+                <div class="flex-1">
+                    <div class="text-slate-500 text-sm mb-1">Dzikir Pagi</div>
+                    <h3 class="text-slate-800 font-semibold text-lg mb-1">Mulai Hari dengan Dzikir</h3>
+                    <div class="flex items-center space-x-2 text-slate-500 text-sm">
+                        <i data-lucide="play" class="w-3 h-3"></i>
+                        <span>4-6 min</span>
+                    </div>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="sun" class="w-8 h-8 text-white"></i>
+                </div>
+            </div>
+
+            <!-- Doa Singkat -->
+            <div id="doa-card" onclick="openActivityModal('doa')" class="bg-white rounded-xl p-4 flex items-center space-x-4 card-shadow-light border border-slate-200 cursor-pointer hover:shadow-lg transition-all">
+                <div class="status-dot status-dot-pending" id="doa-dot"></div>
+                <div class="flex-1">
+                    <div class="text-slate-500 text-sm mb-1">Doa Singkat</div>
+                    <h3 class="text-slate-800 font-semibold text-lg mb-1">Doa untuk Hari Ini</h3>
+                    <div class="flex items-center space-x-2 text-slate-500 text-sm">
+                        <i data-lucide="play" class="w-3 h-3"></i>
+                        <span>1-2 min</span>
+                    </div>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="hands" class="w-8 h-8 text-white"></i>
+                </div>
+            </div>
+
+            <!-- Completion Status -->
+            <div class="bg-white rounded-xl p-4 mt-6 card-shadow-light border border-slate-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-slate-800 font-semibold text-lg mb-1">Progress Hari Ini</h3>
+                        <p class="text-slate-500 text-sm">Selesaikan semua aktivitas untuk mendapat pahala sempurna</p>
+                    </div>
+                    <div class="relative w-16 h-16">
+                        <div class="progress-circle w-16 h-16 rounded-full flex items-center justify-center" id="progress-circle" style="--progress: 90deg;">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-inner">
+                                <span class="text-slate-700 font-bold text-sm" id="progress-text">25%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 space-y-2" id="progress-list">
+                    <div class="flex items-center space-x-3" id="verse-progress">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                        <span class="text-slate-600 text-sm">Verse of the Day ✓</span>
+                    </div>
+                    <div class="flex items-center space-x-3" id="renungan-progress">
+                        <div class="w-2 h-2 bg-slate-300 rounded-full"></div>
+                        <span class="text-slate-400 text-sm" id="renungan-text">Renungan Harian</span>
+                    </div>
+                    <div class="flex items-center space-x-3" id="dzikir-progress">
+                        <div class="w-2 h-2 bg-slate-300 rounded-full"></div>
+                        <span class="text-slate-400 text-sm" id="dzikir-text">Dzikir Pagi</span>
+                    </div>
+                    <div class="flex items-center space-x-3" id="doa-progress">
+                        <div class="w-2 h-2 bg-slate-300 rounded-full"></div>
+                        <span class="text-slate-400 text-sm" id="doa-text">Doa Singkat</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
-    
-    <div class="h-28"></div> <footer class="bg-slate-800 text-slate-400 py-8 text-center"><p>&copy; 2025 HidayahPath. All Rights Reserved.</p></footer>
-    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm shadow-xl rounded-full transition-all duration-300 z-50">
+
+    <!-- Activity Modal -->
+    <div id="activity-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay fixed inset-0" onclick="closeActivityModal()"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto modal-enter" id="modal-content">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm shadow-xl rounded-full transition-all duration-300 z-40 border border-slate-200">
         <div class="flex justify-around items-center h-16 px-4 py-2 gap-2 md:gap-4">
-            <a href="beranda.html" data-page="beranda" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="home" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Beranda</span></a>
-            <a href="fahmi.html" data-page="fahmi" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="message-circle-question" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Fahmi</span></a>
-            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all"><i data-lucide="book-open" class="w-8 h-8"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Qur'an</span></a>
-            <a href="hasanah.html" data-page="hasanah" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="sparkles" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Hasanah</span></a>
-            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2"><i data-lucide="film" class="w-6 h-6"></i><span class="tooltip hidden absolute -top-10 bg-slate-800 text-white text-xs rounded-md px-2 py-1">Studio</span></a>
+            <a href="beranda.html" data-page="beranda" class="nav-link group relative flex flex-col items-center justify-center text-emerald-600 transition-colors p-2">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span class="text-xs mt-1 opacity-70 group-hover:opacity-100">Beranda</span>
+            </a>
+            <a href="fahmi.html" data-page="fahmi" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2">
+                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                <span class="text-xs mt-1 opacity-70 group-hover:opacity-100">Fahmi</span>
+            </a>
+            <a href="alquran.html" data-page="alquran" class="nav-link group relative -translate-y-3 flex items-center justify-center bg-emerald-500 text-white rounded-full w-16 h-16 shadow-lg hover:bg-emerald-600 transition-all">
+                <i data-lucide="book-open" class="w-8 h-8"></i>
+            </a>
+            <a href="hasanah.html" data-page="hasanah" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2">
+                <i data-lucide="coins" class="w-5 h-5"></i>
+                <span class="text-xs mt-1 opacity-70 group-hover:opacity-100">Hasanah</span>
+            </a>
+            <a href="studio.html" data-page="studio" class="nav-link group relative flex flex-col items-center justify-center text-slate-500 hover:text-emerald-500 transition-colors p-2">
+                <i data-lucide="mic" class="w-5 h-5"></i>
+                <span class="text-xs mt-1 opacity-70 group-hover:opacity-100">Studio</span>
+            </a>
         </div>
     </nav>
 
     <script>
-        // SCRIPT BERSAMA (UNTUK SEMUA HALAMAN)
+        // Global variables
+        let isLiked = false;
+        let dailyNotification = true;
+        let completedActivities = JSON.parse(localStorage.getItem('completedActivities')) || [];
+
+        // Activity data
+        const activities = {
+            renungan: {
+                title: 'Renungan Harian',
+                subtitle: 'Hikmah dari Ayat Hari Ini',
+                duration: '2-5 min',
+                icon: 'book-open',
+                gradient: 'from-purple-400 to-purple-600',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-slate-600 leading-relaxed">
+                            Ayat hari ini mengajarkan kita tentang pentingnya memulai segala sesuatu dengan nama Allah. 
+                            Bismillah bukan hanya sekedar ucapan, tetapi sebuah keyakinan bahwa Allah adalah sumber 
+                            dari segala kebaikan dan keberkahan.
+                        </p>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-slate-800 mb-2">Hikmah untuk Hari Ini:</h4>
+                            <ul class="text-slate-600 space-y-2 text-sm">
+                                <li>• Mulai setiap aktivitas dengan Bismillah</li>
+                                <li>• Percayakan semua urusan kepada Allah</li>
+                                <li>• Ingat bahwa Allah Maha Pengasih dan Penyayang</li>
+                            </ul>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed">
+                            Mari kita renungkan makna mendalam dari ayat ini dan terapkan dalam kehidupan sehari-hari.
+                        </p>
+                    </div>
+                `
+            },
+            dzikir: {
+                title: 'Dzikir Pagi',
+                subtitle: 'Mulai Hari dengan Dzikir',
+                duration: '4-6 min',
+                icon: 'sun',
+                gradient: 'from-emerald-400 to-emerald-600',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-slate-600 leading-relaxed">
+                            Dzikir pagi adalah amalan yang sangat dianjurkan untuk memulai hari dengan berkah. 
+                            Mari kita awali hari ini dengan dzikir-dzikir pilihan.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-slate-800 mb-2">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ</h4>
+                                <p class="text-slate-600 text-sm italic">
+                                    "Kami telah memasuki waktu pagi dan kerajaan hanya milik Allah"
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">Dibaca 3x</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-slate-800 mb-2">اللَّهُمَّ بِكَ أَصْبَحْنَا</h4>
+                                <p class="text-slate-600 text-sm italic">
+                                    "Ya Allah, dengan-Mu kami memasuki waktu pagi"
+                                </p>
+                                <p class="text-xs text-slate-500 mt-1">Dibaca 3x</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            doa: {
+                title: 'Doa Singkat',
+                subtitle: 'Doa untuk Hari Ini',
+                duration: '1-2 min',
+                icon: 'hands',
+                gradient: 'from-blue-400 to-blue-600',
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-slate-600 leading-relaxed">
+                            Doa adalah senjata orang mukmin. Mari kita panjatkan doa singkat untuk hari ini.
+                        </p>
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                            <h4 class="font-semibold text-slate-800 mb-3 text-center">Doa Memulai Hari</h4>
+                            <div class="text-center space-y-3">
+                                <p class="font-arabic text-xl text-slate-800 leading-relaxed">
+                                    رَبِّ أَعِنِّي وَلَا تُعِنْ عَلَيَّ وَانْصُرْنِي وَلَا تَنْصُرْ عَلَيَّ
+                                </p>
+                                <p class="text-slate-600 text-sm italic">
+                                    "Ya Tuhanku, tolonglah aku dan jangan Engkau tolong musuhku untuk melawanku, 
+                                    menangkanlah aku dan jangan Engkau menangkan musuhku atasku"
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-slate-600 text-sm">
+                                Ucapkan doa ini dengan khusyuk dan penuh harapan kepada Allah SWT.
+                            </p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Initialize app
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            loadTodaysVerse();
+            updateStreakCount();
+            updateProgress();
+        });
 
-            // Logika Tooltip
-            document.querySelectorAll('.nav-link').forEach(link => {
-                const tooltip = link.querySelector('.tooltip');
-                if (tooltip) {
-                    link.addEventListener('mouseenter', () => { if (window.innerWidth >= 768) tooltip.classList.remove('hidden'); });
-                    link.addEventListener('mouseleave', () => { if (window.innerWidth >= 768) tooltip.classList.add('hidden'); });
+        // Load today's verse from API
+        async function loadTodaysVerse() {
+            try {
+                const todayVerse = {
+                    surah: { name_latin: "Al-Fatihah", number: 1 },
+                    ayat: {
+                        number: 1,
+                        arabic: "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ",
+                        translation: "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."
+                    }
+                };
+
+                document.getElementById('verse-reference').textContent = 
+                    `QS. ${todayVerse.surah.name_latin} (${todayVerse.surah.number}): ${todayVerse.ayat.number}`;
+                document.getElementById('verse-arabic').textContent = todayVerse.ayat.arabic;
+                document.getElementById('verse-translation').textContent = `"${todayVerse.ayat.translation}"`;
+                
+            } catch (error) {
+                console.error('Error loading verse:', error);
+            }
+        }
+
+        // Open activity modal
+        function openActivityModal(activityType) {
+            const modal = document.getElementById('activity-modal');
+            const modalContent = document.getElementById('modal-content');
+            const activity = activities[activityType];
+            
+            if (!activity) return;
+            
+            const isCompleted = completedActivities.includes(activityType);
+            
+            modalContent.innerHTML = `
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-gradient-to-br ${activity.gradient} rounded-lg flex items-center justify-center">
+                                <i data-lucide="${activity.icon}" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">${activity.title}</h3>
+                                <p class="text-slate-500 text-sm">${activity.duration}</p>
+                            </div>
+                        </div>
+                        <button onclick="closeActivityModal()" class="text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        ${activity.content}
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="closeActivityModal()" 
+                                class="flex-1 px-4 py-3 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
+                            Tutup
+                        </button>
+                        <button onclick="completeActivity('${activityType}')" 
+                                class="flex-1 px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors ${isCompleted ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${isCompleted ? 'disabled' : ''}>
+                            ${isCompleted ? 'Sudah Selesai ✓' : 'Tandai Selesai'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // Close activity modal
+        function closeActivityModal() {
+            const modal = document.getElementById('activity-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.classList.add('modal-exit');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modalContent.classList.remove('modal-exit');
+            }, 300);
+        }
+
+        // Complete activity
+        function completeActivity(activityType) {
+            if (!completedActivities.includes(activityType)) {
+                completedActivities.push(activityType);
+                localStorage.setItem('completedActivities', JSON.stringify(completedActivities));
+                
+                // Update UI
+                updateProgress();
+                updateCardStatus(activityType);
+                
+                // Show success message
+                setTimeout(() => {
+                    closeActivityModal();
+                    showCompletionMessage(activityType);
+                }, 500);
+            }
+        }
+
+        // Update card status
+        function updateCardStatus(activityType) {
+            const card = document.getElementById(`${activityType}-card`);
+            const dot = document.getElementById(`${activityType}-dot`);
+            
+            if (card && dot) {
+                card.classList.add('completed-card');
+                dot.classList.remove('status-dot-pending');
+                dot.classList.add('status-dot-completed');
+            }
+        }
+
+        // Update progress - FIXED VERSION
+        function updateProgress() {
+            const totalActivities = 4; // verse + renungan + dzikir + doa
+            const completedCount = completedActivities.length + 1; // +1 for verse (always completed)
+            const percentage = Math.round((completedCount / totalActivities) * 100);
+            const degrees = (completedCount / totalActivities) * 360;
+            
+            document.getElementById('progress-text').textContent = `${percentage}%`;
+            document.getElementById('progress-circle').style.setProperty('--progress', `${degrees}deg`);
+            
+            // Update progress list - CLEANED UP LOGIC
+            const activityMap = {
+                'renungan': 'Renungan Harian',
+                'dzikir': 'Dzikir Pagi', 
+                'doa': 'Doa Singkat'
+            };
+            
+            Object.keys(activityMap).forEach(activity => {
+                const progressItem = document.getElementById(`${activity}-progress`);
+                const textElement = document.getElementById(`${activity}-text`);
+                
+                if (progressItem && textElement) {
+                    const dot = progressItem.querySelector('.w-2');
+                    
+                    if (completedActivities.includes(activity)) {
+                        // Mark as completed
+                        dot.classList.remove('bg-slate-300');
+                        dot.classList.add('bg-emerald-500');
+                        textElement.classList.remove('text-slate-400');
+                        textElement.classList.add('text-slate-600');
+                        textElement.textContent = `${activityMap[activity]} ✓`;
+                    } else {
+                        // Keep as pending
+                        dot.classList.remove('bg-emerald-500');
+                        dot.classList.add('bg-slate-300');
+                        textElement.classList.remove('text-slate-600');
+                        textElement.classList.add('text-slate-400');
+                        textElement.textContent = activityMap[activity];
+                    }
                 }
             });
+            
+            // Update card status on load
+            completedActivities.forEach(activity => {
+                updateCardStatus(activity);
+            });
+        }
 
-            // Logika Navigasi Aktif
-            const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'beranda';
-            const activeLink = document.querySelector(`.nav-link[data-page="${currentPage}"]`);
-            if (activeLink) {
-                if (currentPage !== 'alquran') {
-                    activeLink.classList.remove('text-slate-500');
-                    activeLink.classList.add('text-emerald-500');
-                }
-                // (Untuk tombol Al-Qur'an, state aktifnya sudah ditandai dengan background solid)
+        // Show completion message
+        function showCompletionMessage(activityType) {
+            const activity = activities[activityType];
+            alert(`🎉 Alhamdulillah! Anda telah menyelesaikan ${activity.title}. Semoga menjadi amal jariyah yang bermanfaat.`);
+        }
+
+        // Toggle like function
+        function toggleLike() {
+            isLiked = !isLiked;
+            const likeBtn = document.getElementById('like-btn');
+            const heartIcon = likeBtn.querySelector('i');
+            const likeCount = document.getElementById('like-count');
+            
+            if (isLiked) {
+                heartIcon.classList.add('text-red-500');
+                heartIcon.classList.remove('text-white/80');
+                let currentCount = 136500;
+                likeCount.textContent = formatNumber(currentCount + 1);
+            } else {
+                heartIcon.classList.remove('text-red-500');
+                heartIcon.classList.add('text-white/80');
+                likeCount.textContent = '136.5k';
             }
+        }
 
-            // --- SCRIPT SPESIFIK UNTUK BERANDA.HTML ---
-            const verseContainer = document.getElementById('verse-arabic');
-            if (verseContainer) {
-                const verses = [
-                    { arabic: "فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا", translation: "Maka sesungguhnya beserta kesulitan ada kemudahan.", reference: "QS. Ash-Sharh: 5" },
-                    { arabic: "أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ", translation: "Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram.", reference: "QS. Ar-Ra'd: 28" },
-                    { arabic: "لَا يُكَلِّفُ ٱللَّهُ نَفْسًا إِلَّا وُسْعَهَا", translation: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.", reference: "QS. Al-Baqarah: 286" }
-                ];
-                let currentVerseIndex = 0;
-                const verseArabicEl = document.getElementById('verse-arabic');
-                const verseTranslationEl = document.getElementById('verse-translation');
-                const verseReferenceEl = document.getElementById('verse-reference');
-
-                function updateVerse(index) {
-                    verseArabicEl.textContent = verses[index].arabic;
-                    verseTranslationEl.textContent = `"${verses[index].translation}"`;
-                    verseReferenceEl.textContent = verses[index].reference;
-                }
-
-                document.getElementById('prev-verse').addEventListener('click', () => {
-                    currentVerseIndex = (currentVerseIndex - 1 + verses.length) % verses.length;
-                    updateVerse(currentVerseIndex);
+        // Share verse function
+        function shareVerse() {
+            const verseText = document.getElementById('verse-arabic').textContent;
+            const translation = document.getElementById('verse-translation').textContent;
+            const reference = document.getElementById('verse-reference').textContent;
+            
+            const shareText = `${reference}\n\n${verseText}\n\n${translation}\n\n#VerseDailynya #HidayahPath`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Verse of the Day',
+                    text: shareText,
+                    url: window.location.href
                 });
-
-                document.getElementById('next-verse').addEventListener('click', () => {
-                    currentVerseIndex = (currentVerseIndex + 1) % verses.length;
-                    updateVerse(currentVerseIndex);
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Ayat berhasil disalin ke clipboard!');
                 });
-                
-                updateVerse(currentVerseIndex);
             }
-        });
+        }
+
+        // Show more options
+        function showMoreOptions() {
+            const options = [
+                'Bookmark ayat ini',
+                'Dengarkan audio',
+                'Lihat tafsir',
+                'Bagikan ke sosial media',
+                'Simpan sebagai wallpaper'
+            ];
+            
+            alert('Opsi lainnya:\n' + options.join('\n'));
+        }
+
+        // Toggle daily notification
+        function toggleDailyNotification() {
+            dailyNotification = !dailyNotification;
+            if (!dailyNotification) {
+                document.querySelector('.bg-black\\/20').style.display = 'none';
+            }
+        }
+
+        // Format number for display
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        // Update streak count
+        function updateStreakCount() {
+            const streakCount = localStorage.getItem('dailyStreak') || 1;
+            document.getElementById('streak-count').textContent = streakCount;
+        }
+
+        // Auto-refresh verse daily
+        function checkForNewDay() {
+            const lastUpdate = localStorage.getItem('lastVerseUpdate');
+            const today = new Date().toDateString();
+            
+            if (lastUpdate !== today) {
+                loadTodaysVerse();
+                localStorage.setItem('lastVerseUpdate', today);
+                // Reset completed activities for new day
+                localStorage.removeItem('completedActivities');
+                completedActivities = [];
+                updateProgress();
+            }
+        }
+
+        // Check every hour for new day
+        setInterval(checkForNewDay, 3600000);
     </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -345,6 +347,13 @@
     </nav>
 
     <script>
+
+        if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js")
+            .then(reg => console.log("Service Worker registered", reg))
+            .catch(err => console.error("SW registration failed", err));
+        }
+
         // Global variables
         let isLiked = false;
         let dailyNotification = true;

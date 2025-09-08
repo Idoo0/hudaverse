@@ -1,7 +1,7 @@
 {
   "name": "Nama Aplikasi Kamu",
   "short_name": "AppKamu",
-  "start_url": "/beranda.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0f172a",

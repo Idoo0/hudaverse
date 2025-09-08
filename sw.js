@@ -1,7 +1,7 @@
 const CACHE_NAME = "my-app-cache-v1";
 const urlsToCache = [
   "/",
-  "/beranda.html",
+  "/index.html",
   "/styles.css",
   "/app.js"
 ];

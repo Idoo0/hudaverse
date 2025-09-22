@@ -38,6 +38,7 @@
     <title>Beranda - HidayahPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/update-manager.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -758,32 +759,9 @@
         // Check every hour for new day
         setInterval(checkForNewDay, 3600000);
 
-        // PWA Installation and Service Worker Registration
+        // PWA Install Handler
         let deferredPrompt;
         
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', async () => {
-                try {
-                    const registration = await navigator.serviceWorker.register('sw.js');
-                    console.log('Service Worker registered successfully:', registration.scope);
-                    
-                    // Check for updates
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New update available
-                                showUpdateNotification();
-                            }
-                        });
-                    });
-                } catch (error) {
-                    console.error('Service Worker registration failed:', error);
-                }
-            });
-        }
-
         // Handle install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -795,7 +773,7 @@
         function showInstallButton() {
             const installBtn = document.getElementById('install-button');
             if (installBtn) {
-                installBtn.style.display = 'block';
+                installBtn.style.display = 'flex';
                 installBtn.addEventListener('click', installApp);
             }
         }
@@ -811,32 +789,18 @@
             }
         }
 
-        // Show update notification
-        function showUpdateNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-emerald-500 text-white p-4 rounded-lg shadow-lg z-50';
-            notification.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <i data-lucide="download" class="w-5 h-5"></i>
-                    <span>Update tersedia!</span>
-                    <button onclick="location.reload()" class="bg-white text-emerald-500 px-3 py-1 rounded text-sm font-medium">
-                        Update
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(notification);
-            
-            // Auto remove after 10 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 10000);
-        }
-
         // Check if app is installed
         window.addEventListener('appinstalled', () => {
             console.log('PWA was installed');
             document.getElementById('install-button').style.display = 'none';
         });
+
+        // Manual update check button (for testing)
+        function checkForUpdates() {
+            if (window.updateManager) {
+                updateManager.checkForUpdate();
+            }
+        }
     </script>
 </body>
 </html>

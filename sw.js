@@ -1,6 +1,7 @@
-const CACHE_NAME = 'hidayahpath-v1.0.0';
-const STATIC_CACHE = 'hidayahpath-static-v1.0.0';
-const DYNAMIC_CACHE = 'hidayahpath-dynamic-v1.0.0';
+const CACHE_NAME = 'hidayahpath-v1.0.1';
+const STATIC_CACHE = 'hidayahpath-static-v1.0.1';
+const DYNAMIC_CACHE = 'hidayahpath-dynamic-v1.0.1';
+const APP_VERSION = '1.0.1';
 
 // Files to cache immediately
 const STATIC_FILES = [
@@ -19,25 +20,6 @@ const STATIC_FILES = [
   'https://unpkg.com/lucide@latest',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap'
 ];
-
-// Install event - cache static files
-self.addEventListener('install', event => {
-  console.log('Service Worker: Installing...');
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then(cache => {
-        console.log('Service Worker: Caching static files');
-        return cache.addAll(STATIC_FILES);
-      })
-      .then(() => {
-        console.log('Service Worker: Static files cached successfully');
-        return self.skipWaiting();
-      })
-      .catch(error => {
-        console.error('Service Worker: Error caching static files', error);
-      })
-  );
-});
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
@@ -208,18 +190,71 @@ async function syncStreak() {
   }
 }
 
-// Cache management
+// Cache management and update handling
 self.addEventListener('message', event => {
+  console.log('Service Worker: Received message', event.data);
+  
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: Skipping waiting...');
     self.skipWaiting();
+    
+    // Notify all clients about the update
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: APP_VERSION
+        });
+      });
+    });
   }
   
   if (event.data && event.data.type === 'CACHE_UPDATE') {
     event.waitUntil(updateCache());
   }
+  
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({
+      type: 'VERSION',
+      version: APP_VERSION
+    });
+  }
+});
+
+// Notify clients when new version is available
+self.addEventListener('install', event => {
+  console.log(`Service Worker: Installing version ${APP_VERSION}...`);
+  
+  // Notify all clients about update availability
+  event.waitUntil(
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'UPDATE_AVAILABLE',
+          version: APP_VERSION
+        });
+      });
+    })
+  );
+  
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then(cache => {
+        console.log('Service Worker: Caching static files');
+        return cache.addAll(STATIC_FILES);
+      })
+      .then(() => {
+        console.log('Service Worker: Static files cached successfully');
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('Service Worker: Error caching static files', error);
+      })
+  );
 });
 
 async function updateCache() {
+  console.log('Service Worker: Updating cache...');
   const cache = await caches.open(STATIC_CACHE);
   const requests = STATIC_FILES.map(url => {
     return cache.add(url).catch(error => {
@@ -227,4 +262,5 @@ async function updateCache() {
     });
   });
   await Promise.all(requests);
+  console.log('Service Worker: Cache updated successfully');
 }

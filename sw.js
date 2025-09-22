@@ -4,17 +4,17 @@ const DYNAMIC_CACHE = 'hidayahpath-dynamic-v1.0.0';
 
 // Files to cache immediately
 const STATIC_FILES = [
-  '/',
-  '/index.html',
-  '/alquran.html',
-  '/fahmi.html',
-  '/hasanah.html',
-  '/studio.html',
-  '/manifest.json',
-  '/logo.png',
-  '/latarbelakang.jpg',
-  '/js/quran-data.js',
-  '/js/streak-manager.js',
+  '/hudaverse/',
+  '/hudaverse/index.html',
+  '/hudaverse/alquran.html',
+  '/hudaverse/fahmi.html',
+  '/hudaverse/hasanah.html',
+  '/hudaverse/studio.html',
+  '/hudaverse/manifest.json',
+  '/hudaverse/logo.png',
+  '/hudaverse/latarbelakang.jpg',
+  '/hudaverse/js/quran-data.js',
+  '/hudaverse/js/streak-manager.js',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@latest',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap'

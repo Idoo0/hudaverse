@@ -1,10 +1,37 @@
 <!DOCTYPE html>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+
 <html lang="id">
 <head>
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HidayahPath">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="HidayahPath">
+    <meta name="msapplication-TileColor" content="#0f172a">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.png">
+    
+    <!-- Meta Tags -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Aplikasi Islami untuk membaca Al-Quran, mengelola aktivitas harian, dan memperkuat spiritual">
+    <meta name="keywords" content="Islam, Al-Quran, Ibadah, Spiritual, PWA, Muslim">
+    <meta name="author" content="HidayahPath Team">
     <title>Beranda - HidayahPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -140,6 +167,11 @@
                     <i data-lucide="zap" class="w-5 h-5 text-yellow-500"></i>
                     <span class="text-yellow-600 font-semibold" id="streak-count">1</span>
                 </div>
+                <!-- Install Button -->
+                <button id="install-button" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 transition-colors" title="Install Aplikasi">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Install</span>
+                </button>
                 <!-- <i data-lucide="bell" class="w-6 h-6 text-slate-400"></i> -->
                 <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
                     <span class="text-white font-bold text-sm">A</span>
@@ -722,6 +754,86 @@
 
         // Check every hour for new day
         setInterval(checkForNewDay, 3600000);
+
+        // PWA Installation and Service Worker Registration
+        let deferredPrompt;
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New update available
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
+            });
+        }
+
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        // Show install button
+        function showInstallButton() {
+            const installBtn = document.getElementById('install-button');
+            if (installBtn) {
+                installBtn.style.display = 'block';
+                installBtn.addEventListener('click', installApp);
+            }
+        }
+
+        // Install app
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('User choice:', outcome);
+                deferredPrompt = null;
+                document.getElementById('install-button').style.display = 'none';
+            }
+        }
+
+        // Show update notification
+        function showUpdateNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-emerald-500 text-white p-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span>Update tersedia!</span>
+                    <button onclick="location.reload()" class="bg-white text-emerald-500 px-3 py-1 rounded text-sm font-medium">
+                        Update
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto remove after 10 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 10000);
+        }
+
+        // Check if app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            document.getElementById('install-button').style.display = 'none';
+        });
     </script>
 </body>
 </html>

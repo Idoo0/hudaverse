@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- Islamic Pattern Background -->
+  <g opacity="0.1">
+    <path d="M256 80 L320 144 L256 208 L192 144 Z" fill="#ffffff"/>
+    <path d="M256 304 L320 368 L256 432 L192 368 Z" fill="#ffffff"/>
+    <path d="M80 256 L144 192 L208 256 L144 320 Z" fill="#ffffff"/>
+    <path d="M304 256 L368 192 L432 256 L368 320 Z" fill="#ffffff"/>
+  </g>
+  
+  <!-- Mosque Icon -->
+  <g fill="url(#textGradient)">
+    <!-- Main Dome -->
+    <path d="M256 120 C280 120 300 140 300 164 L300 200 L212 200 L212 164 C212 140 232 120 256 120 Z"/>
+    
+    <!-- Crescent -->
+    <path d="M256 100 C260 100 264 104 264 108 C264 116 260 120 256 120 C252 120 248 116 248 108 C248 104 252 100 256 100 Z"/>
+    <circle cx="260" cy="108" r="4" fill="#0f172a"/>
+    
+    <!-- Minaret Left -->
+    <rect x="180" y="160" width="20" height="80" rx="4"/>
+    <circle cx="190" cy="140" r="12"/>
+    <path d="M190 120 C194 120 198 124 198 128 C198 136 194 140 190 140 C186 140 182 136 182 128 C182 124 186 120 190 120 Z"/>
+    
+    <!-- Minaret Right -->
+    <rect x="312" y="160" width="20" height="80" rx="4"/>
+    <circle cx="322" cy="140" r="12"/>
+    <path d="M322 120 C326 120 330 124 330 128 C330 136 326 140 322 140 C318 140 314 136 314 128 C314 124 318 120 322 120 Z"/>
+    
+    <!-- Main Building -->
+    <rect x="200" y="200" width="112" height="120" rx="8"/>
+    
+    <!-- Door -->
+    <path d="M240 280 L240 320 L272 320 L272 280 C272 270 262 260 256 260 C250 260 240 270 240 280 Z" fill="#0f172a"/>
+    
+    <!-- Windows -->
+    <circle cx="230" cy="240" r="8" fill="#0f172a"/>
+    <circle cx="282" cy="240" r="8" fill="#0f172a"/>
+  </g>
+  
+  <!-- App Name -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="url(#textGradient)" text-anchor="middle">HidayahPath</text>
+</svg>

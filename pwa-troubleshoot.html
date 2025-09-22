@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Installation Troubleshoot - HidayahPath</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6; 
+            background: #f8fafc;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+        }
+        h1 { 
+            color: #1e293b; 
+            border-bottom: 3px solid #10b981; 
+            padding-bottom: 10px; 
+        }
+        .status-check { 
+            background: #f1f5f9; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            border-left: 4px solid #3b82f6; 
+        }
+        .error { 
+            background: #fef2f2; 
+            border-left-color: #ef4444; 
+            color: #991b1b; 
+        }
+        .success { 
+            background: #f0fdf4; 
+            border-left-color: #22c55e; 
+            color: #166534; 
+        }
+        .warning { 
+            background: #fefbf2; 
+            border-left-color: #f59e0b; 
+            color: #92400e; 
+        }
+        .button { 
+            background: #10b981; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin: 10px 5px; 
+            transition: background 0.2s; 
+        }
+        .button:hover { 
+            background: #059669; 
+        }
+        .code { 
+            background: #1e293b; 
+            color: #e2e8f0; 
+            padding: 15px; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            font-family: 'Courier New', monospace; 
+            margin: 10px 0; 
+            font-size: 14px;
+        }
+        .result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+        }
+        .install-instructions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .platform {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .platform h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 PWA Installation Troubleshoot</h1>
+        
+        <div class="status-check">
+            <h2>📋 PWA Requirements Check</h2>
+            <button class="button" onclick="checkPWARequirements()">Check PWA Status</button>
+            <div id="pwa-results"></div>
+        </div>
+
+        <div class="install-instructions">
+            <div class="platform">
+                <h3>🤖 Android (Chrome)</h3>
+                <ol>
+                    <li>Buka <strong>Chrome browser</strong></li>
+                    <li>Go to: <code>https://Idoo0.github.io/hudaverse/</code></li>
+                    <li>Tunggu loading lengkap</li>
+                    <li>Lihat <strong>address bar</strong> - ada ikon install</li>
+                    <li>Atau menu ⋮ → <strong>"Install app"</strong></li>
+                    <li>Klik <strong>"Install"</strong></li>
+                </ol>
+                <div class="warning">
+                    <strong>Catatan:</strong> Fitur install hanya muncul jika semua PWA requirements terpenuhi.
+                </div>
+            </div>
+
+            <div class="platform">
+                <h3>🍎 iOS (Safari)</h3>
+                <ol>
+                    <li>Buka <strong>Safari browser</strong></li>
+                    <li>Go to: <code>https://Idoo0.github.io/hudaverse/</code></li>
+                    <li>Klik tombol <strong>Share</strong> (kotak dengan panah)</li>
+                    <li>Scroll dan pilih <strong>"Add to Home Screen"</strong></li>
+                    <li>Edit nama jika perlu</li>
+                    <li>Klik <strong>"Add"</strong></li>
+                </ol>
+                <div class="warning">
+                    <strong>Catatan:</strong> iOS tidak show install prompt otomatis, harus manual via Share menu.
+                </div>
+            </div>
+
+            <div class="platform">
+                <h3>🖥️ Desktop (Chrome/Edge)</h3>
+                <ol>
+                    <li>Buka <strong>Chrome/Edge browser</strong></li>
+                    <li>Go to: <code>https://Idoo0.github.io/hudaverse/</code></li>
+                    <li>Lihat <strong>address bar</strong> - ada ikon install</li>
+                    <li>Atau menu → <strong>"Install HidayahPath"</strong></li>
+                    <li>Klik <strong>"Install"</strong></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="status-check">
+            <h2>🌐 Live Tests</h2>
+            <button class="button" onclick="testManifest()">Test Manifest</button>
+            <button class="button" onclick="testServiceWorker()">Test Service Worker</button>
+            <button class="button" onclick="testIcons()">Test Icons</button>
+            <button class="button" onclick="testInstallability()">Test Installability</button>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="status-check">
+            <h2>🚨 Common Issues & Solutions</h2>
+            
+            <h3>❌ Install button tidak muncul</h3>
+            <ul>
+                <li><strong>Check HTTPS:</strong> PWA hanya work di HTTPS</li>
+                <li><strong>Check Manifest:</strong> File manifest.json harus accessible</li>
+                <li><strong>Check Service Worker:</strong> SW harus registered successfully</li>
+                <li><strong>Check Icons:</strong> Minimal perlu icon 192x192 dan 512x512</li>
+                <li><strong>Wait for criteria:</strong> Browser butuh beberapa detik untuk evaluate</li>
+            </ul>
+
+            <h3>❌ Error saat install</h3>
+            <ul>
+                <li><strong>Clear cache:</strong> Ctrl+Shift+R atau hard refresh</li>
+                <li><strong>Check Console:</strong> F12 → Console untuk error messages</li>
+                <li><strong>Try incognito:</strong> Test di private/incognito mode</li>
+            </ul>
+
+            <h3>❌ App tidak offline</h3>
+            <ul>
+                <li><strong>Service Worker issue:</strong> Check SW registration</li>
+                <li><strong>Cache strategy:</strong> Wait for initial cache completion</li>
+                <li><strong>Network first visit:</strong> Visit app online first</li>
+            </ul>
+        </div>
+
+        <div class="status-check">
+            <h2>🔍 Debug Tools</h2>
+            <ul>
+                <li><strong>Chrome DevTools:</strong> F12 → Application → Manifest & Service Workers</li>
+                <li><strong>Lighthouse:</strong> F12 → Lighthouse → Progressive Web App</li>
+                <li><strong>PWA Builder:</strong> <a href="https://www.pwabuilder.com/" target="_blank">pwabuilder.com</a></li>
+                <li><strong>Web.dev:</strong> <a href="https://web.dev/measure/" target="_blank">web.dev/measure</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkPWARequirements() {
+            const results = document.getElementById('pwa-results');
+            results.innerHTML = '<div class="result">Checking PWA requirements...</div>';
+            
+            let checks = [];
+            
+            // Check HTTPS
+            const isHTTPS = location.protocol === 'https:';
+            checks.push({
+                name: 'HTTPS Protocol',
+                status: isHTTPS,
+                message: isHTTPS ? 'HTTPS ✅' : 'HTTP ❌ (PWA requires HTTPS)'
+            });
+            
+            // Check Manifest
+            try {
+                const manifestResponse = await fetch('/hudaverse/manifest.json');
+                const manifestExists = manifestResponse.ok;
+                checks.push({
+                    name: 'Web App Manifest',
+                    status: manifestExists,
+                    message: manifestExists ? 'Manifest accessible ✅' : 'Manifest not found ❌'
+                });
+                
+                if (manifestExists) {
+                    const manifest = await manifestResponse.json();
+                    checks.push({
+                        name: 'Manifest Content',
+                        status: !!(manifest.name && manifest.start_url && manifest.display),
+                        message: 'Required fields: ' + (manifest.name ? '✅ name ' : '❌ name ') + 
+                                (manifest.start_url ? '✅ start_url ' : '❌ start_url ') + 
+                                (manifest.display ? '✅ display' : '❌ display')
+                    });
+                }
+            } catch (e) {
+                checks.push({
+                    name: 'Web App Manifest',
+                    status: false,
+                    message: 'Manifest error: ' + e.message + ' ❌'
+                });
+            }
+            
+            // Check Service Worker
+            const swSupported = 'serviceWorker' in navigator;
+            checks.push({
+                name: 'Service Worker Support',
+                status: swSupported,
+                message: swSupported ? 'Service Worker supported ✅' : 'Service Worker not supported ❌'
+            });
+            
+            if (swSupported) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    checks.push({
+                        name: 'Service Worker Registration',
+                        status: !!registration,
+                        message: registration ? 'Service Worker registered ✅' : 'Service Worker not registered ❌'
+                    });
+                } catch (e) {
+                    checks.push({
+                        name: 'Service Worker Registration',
+                        status: false,
+                        message: 'SW error: ' + e.message + ' ❌'
+                    });
+                }
+            }
+            
+            // Display results
+            let html = '';
+            checks.forEach(check => {
+                const className = check.status ? 'success' : 'error';
+                html += `<div class="result ${className}">${check.name}: ${check.message}</div>`;
+            });
+            
+            results.innerHTML = html;
+        }
+        
+        async function testManifest() {
+            const results = document.getElementById('test-results');
+            try {
+                const response = await fetch('/hudaverse/manifest.json');
+                const manifest = await response.json();
+                results.innerHTML = `<div class="result success">Manifest loaded ✅<br><pre>${JSON.stringify(manifest, null, 2).substring(0, 300)}...</pre></div>`;
+            } catch (e) {
+                results.innerHTML = `<div class="result error">Manifest error ❌<br>${e.message}</div>`;
+            }
+        }
+        
+        async function testServiceWorker() {
+            const results = document.getElementById('test-results');
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/hudaverse/sw.js');
+                    results.innerHTML = `<div class="result success">Service Worker test ✅<br>Scope: ${registration.scope}</div>`;
+                } catch (e) {
+                    results.innerHTML = `<div class="result error">Service Worker error ❌<br>${e.message}</div>`;
+                }
+            } else {
+                results.innerHTML = `<div class="result error">Service Worker not supported ❌</div>`;
+            }
+        }
+        
+        async function testIcons() {
+            const results = document.getElementById('test-results');
+            const iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
+            let html = '<div class="result">Testing icons:<br>';
+            
+            for (const size of iconSizes) {
+                try {
+                    const response = await fetch(`/hudaverse/icons/icon-${size}.png`);
+                    html += `${size}: ${response.ok ? '✅' : '❌'} `;
+                } catch (e) {
+                    html += `${size}: ❌ `;
+                }
+            }
+            
+            html += '</div>';
+            results.innerHTML = html;
+        }
+        
+        function testInstallability() {
+            const results = document.getElementById('test-results');
+            let html = '<div class="result">Installability tests:<br>';
+            
+            // Check beforeinstallprompt
+            if (window.deferredPrompt) {
+                html += 'Install prompt available ✅<br>';
+            } else {
+                html += 'Install prompt not triggered yet ⏳<br>';
+            }
+            
+            // Check if already installed
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+                html += 'Already installed as PWA ✅<br>';
+            } else if (window.navigator.standalone === true) {
+                html += 'Already installed (iOS) ✅<br>';
+            } else {
+                html += 'Not installed yet ⏳<br>';
+            }
+            
+            html += '</div>';
+            results.innerHTML = html;
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkPWARequirements, 1000);
+        });
+    </script>
+</body>
+</html>

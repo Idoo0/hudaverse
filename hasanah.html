@@ -111,21 +111,19 @@
         const resultContainer = document.getElementById('habits-result-container');
         const myHabitsContainer = document.getElementById('my-habits-container');
         
-        // Initialize AI service manager and hasanah generator
-        const aiServiceManager = new AIServiceManager();
-        let hasanahGenerator = null;
+        // Initialize hasanah generator (now uses default API key)
+        let hasanahGenerator = window.hasanahGenerator;
         
-        // Initialize hasanah generator
-        try {
-            hasanahGenerator = new HasanahGenerator();
-            await hasanahGenerator.init();
-        } catch (error) {
-            console.error('Failed to initialize Hasanah Generator:', error);
+        // Simple check if generator is ready
+        if (!hasanahGenerator) {
+            console.error('Hasanah Generator not found');
             resultContainer.innerHTML = `
                 <div class="text-center p-8 bg-red-100 text-red-700 rounded-lg">
-                    <p>Gagal menginisialisasi generator hasanah. Silakan refresh halaman.</p>
+                    <p>Generator hasanah tidak ditemukan. Silakan refresh halaman.</p>
                 </div>
             `;
+        } else {
+            console.log('✅ Hasanah Generator ready:', hasanahGenerator.getStatus());
         }
         
         // --- STATE & CACHE MANAGEMENT ---
@@ -143,6 +141,12 @@
 
         // --- RENDER FUNCTIONS (Deklarasi satu kali) ---
         const renderGeneratedHabits = () => {
+            // Safety check: ensure currentGeneratedHabits is an array
+            if (!Array.isArray(currentGeneratedHabits)) {
+                console.warn('currentGeneratedHabits is not an array:', currentGeneratedHabits);
+                currentGeneratedHabits = [];
+            }
+            
             if (currentGeneratedHabits.length === 0) {
                 resultContainer.innerHTML = `<div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg"><p>Saran amalan dari AI akan muncul di sini.</p></div>`;
                 return;
@@ -223,20 +227,11 @@
                 return; 
             }
 
-            // Check if API key is configured
-            if (!aiServiceManager || !aiServiceManager.isConfigured) {
-                resultContainer.innerHTML = `
-                    <div class="text-center p-8 bg-yellow-100 text-yellow-700 rounded-lg">
-                        <p>API key belum dikonfigurasi. Sistem sedang memuat...</p>
-                    </div>
-                `;
-                return;
-            }
-
+            // Simple validation - generator should always be ready with default API key
             if (!hasanahGenerator) {
                 resultContainer.innerHTML = `
                     <div class="text-center p-8 bg-red-100 text-red-700 rounded-lg">
-                        <p>Generator hasanah belum siap. Silakan refresh halaman.</p>
+                        <p>Generator hasanah tidak tersedia. Silakan refresh halaman.</p>
                     </div>
                 `;
                 return;
@@ -247,25 +242,36 @@
             lucide.createIcons();
 
             try {
-                const habits = await hasanahGenerator.generateHabits(parseInt(surahNumber), parseInt(startAyah), parseInt(endAyah));
+                const habitsResponse = await hasanahGenerator.generateHabits(parseInt(surahNumber), parseInt(startAyah), parseInt(endAyah));
                 
-                currentGeneratedHabits = habits;
+                // Extract the habits array from the response object
+                currentGeneratedHabits = habitsResponse.habits || [];
                 saveToCache('generatedHabits', currentGeneratedHabits);
                 renderGeneratedHabits();
 
             } catch (error) {
                 console.error("Generate Habits Error:", error);
                 let errorMessage = 'Terjadi kesalahan saat generate amalan.';
+                let showSetupButton = false;
                 
-                if (error.message.includes('API key')) {
-                    errorMessage = 'API key tidak valid. Silakan periksa konfigurasi.';
+                if (error.message.includes('API key') || error.message.includes('dikonfigurasi')) {
+                    errorMessage = 'API key belum dikonfigurasi atau tidak valid. Silakan setup terlebih dahulu.';
+                    showSetupButton = true;
                 } else if (error.message.includes('quota')) {
                     errorMessage = 'Kuota API telah habis. Silakan coba lagi nanti.';
                 } else if (error.message.includes('network')) {
                     errorMessage = 'Koneksi internet bermasalah. Silakan coba lagi.';
                 }
                 
-                resultContainer.innerHTML = `<div class="text-center p-8 bg-red-100 text-red-700 rounded-lg"><p>${errorMessage}</p></div>`;
+                const setupButtonHtml = showSetupButton ? 
+                    '<button onclick="window.aiServiceManager?.showApiKeySetup()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Setup API Key</button>' : '';
+                
+                resultContainer.innerHTML = `
+                    <div class="text-center p-8 bg-red-100 text-red-700 rounded-lg">
+                        <p>${errorMessage}</p>
+                        ${setupButtonHtml}
+                    </div>
+                `;
             } finally {
                 toggleLoadingState(false);
             }
@@ -302,8 +308,16 @@
 
         generateBtn.addEventListener('click', handleGenerate);
 
-        myHabits = loadFromCache('myHabits');
-        currentGeneratedHabits = loadFromCache('generatedHabits');
+        myHabits = loadFromCache('myHabits') || [];
+        
+        // Load generated habits and ensure it's an array
+        const cachedGeneratedHabits = loadFromCache('generatedHabits');
+        if (Array.isArray(cachedGeneratedHabits)) {
+            currentGeneratedHabits = cachedGeneratedHabits;
+        } else {
+            currentGeneratedHabits = [];
+        }
+        
         renderMyHabits();
         renderGeneratedHabits();
 

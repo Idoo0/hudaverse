@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Integration - Hasanah Generator with AI Service Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/hasanah-generator.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">🧪 Test Integration</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h3 class="font-semibold mb-2">AI Service Manager Status:</h3>
+                <div id="ai-service-status" class="text-sm text-gray-600">Loading...</div>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Hasanah Generator Status:</h3>
+                <div id="hasanah-status" class="text-sm text-gray-600">Loading...</div>
+            </div>
+            
+            <div class="space-x-2">
+                <button id="setup-api-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Setup API Key
+                </button>
+                <button id="test-generate-btn" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" disabled>
+                    Test Generate
+                </button>
+                <button id="refresh-status-btn" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Refresh Status
+                </button>
+            </div>
+            
+            <div id="test-result" class="p-4 bg-gray-50 rounded-lg hidden">
+                <h3 class="font-semibold mb-2">Test Result:</h3>
+                <pre id="result-content" class="text-sm text-gray-700 whitespace-pre-wrap"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let aiServiceManager = null;
+        let hasanahGenerator = null;
+
+        // Wait for services to be available
+        function waitForServices() {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.aiServiceManager && window.hasanahGenerator) {
+                        aiServiceManager = window.aiServiceManager;
+                        hasanahGenerator = window.hasanahGenerator;
+                        resolve();
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
+        }
+
+        function updateStatus() {
+            if (!aiServiceManager || !hasanahGenerator) {
+                document.getElementById('ai-service-status').textContent = 'Services not loaded';
+                document.getElementById('hasanah-status').textContent = 'Services not loaded';
+                return;
+            }
+
+            // AI Service Manager Status
+            const aiStatus = aiServiceManager.getServiceStatus();
+            document.getElementById('ai-service-status').innerHTML = `
+                <div>Configured: ${aiStatus.configured ? '✅' : '❌'}</div>
+                <div>Fahmi Service: ${aiStatus.fahmi ? '✅' : '❌'}</div>
+                <div>Hasanah Service: ${aiStatus.hasanah ? '✅' : '❌'}</div>
+            `;
+
+            // Hasanah Generator Status
+            const hasanahStatus = hasanahGenerator.getStatus();
+            document.getElementById('hasanah-status').innerHTML = `
+                <div>Configured: ${hasanahStatus.isConfigured ? '✅' : '❌'}</div>
+                <div>Has API Key: ${hasanahStatus.hasApiKey ? '✅' : '❌'}</div>
+                <div>Ready: ${hasanahStatus.isReady ? '✅' : '❌'}</div>
+            `;
+
+            // Enable/disable test button
+            document.getElementById('test-generate-btn').disabled = !hasanahStatus.isReady;
+        }
+
+        async function testGenerate() {
+            const resultDiv = document.getElementById('test-result');
+            const resultContent = document.getElementById('result-content');
+            
+            resultDiv.classList.remove('hidden');
+            resultContent.textContent = 'Testing...';
+
+            try {
+                const result = await hasanahGenerator.generateHabits(1, 1, 3); // Test with Al-Fatihah 1-3
+                resultContent.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultContent.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('setup-api-btn').addEventListener('click', () => {
+            if (aiServiceManager) {
+                aiServiceManager.showApiKeySetup();
+            }
+        });
+
+        document.getElementById('test-generate-btn').addEventListener('click', testGenerate);
+        document.getElementById('refresh-status-btn').addEventListener('click', updateStatus);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🧪 Test page loaded, waiting for services...');
+            await waitForServices();
+            console.log('✅ Services loaded');
+            
+            // Update status initially and every 2 seconds
+            updateStatus();
+            setInterval(updateStatus, 2000);
+        });
+    </script>
+</body>
+</html>

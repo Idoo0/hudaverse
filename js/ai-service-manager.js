@@ -49,7 +49,12 @@ class AIServiceManager {
                     window.hasanahGenerator.setApiKey(this.apiKey);
                 }
             }
-        }, 500);
+            
+            console.log('🔗 Services connected:', {
+                fahmi: !!this.services.fahmi,
+                hasanah: !!this.services.hasanah
+            });
+        }, 1000); // Increased timeout for better detection
 
         console.log('🤖 AI Service Manager initialized - Configured:', this.isConfigured);
     }
@@ -73,6 +78,9 @@ class AIServiceManager {
                 this.isConfigured = true;
             }
 
+            // Re-initialize services in case they weren't detected before
+            this.reinitializeServices();
+            
             // Set API key untuk semua services
             if (this.services.fahmi) {
                 this.services.fahmi.setApiKey(apiKey);
@@ -168,6 +176,32 @@ class AIServiceManager {
 
         this.showNotification('API key dihapus', 'info');
         this.showApiKeySetup();
+    }
+
+    // Re-initialize services (useful for late-loaded services)
+    reinitializeServices() {
+        console.log('🔄 Re-initializing services...');
+        
+        if (window.fahmiChatbot && !this.services.fahmi) {
+            this.services.fahmi = window.fahmiChatbot;
+            if (this.apiKey && !window.fahmiChatbot.isConfigured) {
+                window.fahmiChatbot.setApiKey(this.apiKey);
+            }
+            console.log('✅ Fahmi Chatbot connected');
+        }
+        
+        if (window.hasanahGenerator && !this.services.hasanah) {
+            this.services.hasanah = window.hasanahGenerator;
+            if (this.apiKey && !window.hasanahGenerator.isConfigured) {
+                window.hasanahGenerator.setApiKey(this.apiKey);
+            }
+            console.log('✅ Hasanah Generator connected');
+        }
+        
+        console.log('🔗 Services status after re-init:', {
+            fahmi: !!this.services.fahmi,
+            hasanah: !!this.services.hasanah
+        });
     }
 
     // Check if configured
@@ -377,6 +411,10 @@ window.aiServiceManager = new AIServiceManager();
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         window.aiServiceManager.checkSetupRequired();
+        // Re-initialize services after a delay to catch late-loaded services
+        setTimeout(() => {
+            window.aiServiceManager.reinitializeServices();
+        }, 2000);
     }, 1000);
 });
 

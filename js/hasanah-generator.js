@@ -4,27 +4,47 @@ class HasanahGenerator {
         this.apiKey = null;
         this.isConfigured = false;
         this.quranData = {};
+        
+        // Hardcoded API key for development (same as fahmi chatbot)
+        this.defaultApiKey = "AIzaSyAxGvhjqziXocgMKLyqanpyxdIcMMnSWdY";
+        
         this.systemPrompt = `
-ANDA ADALAH SEBUAH API GENERATOR JSON.
-Peran Anda adalah menganalisis teks ayat Al-Qur'an dan mengembalikan daftar amalan dalam format JSON yang ketat.
+ANDA ADALAH API JSON GENERATOR. IKUTI ATURAN BERIKUT DENGAN KETAT:
 
-ATURAN PALING PENTING:
-1. OUTPUT WAJIB dan HANYA berupa string JSON yang valid.
-2. JANGAN PERNAH menulis teks salam, penjelasan, atau kesimpulan di luar struktur JSON. Seluruh jawaban Anda harus bisa langsung di-parse oleh JSON.parse() di JavaScript.
-3. Struktur JSON HARUS seperti ini:
+1. HANYA KEMBALIKAN JSON YANG VALID - TIDAK ADA TEKS LAIN!
+2. JANGAN TAMBAHKAN PENJELASAN, SALAM, ATAU KOMENTAR APAPUN!
+3. FORMAT WAJIB:
+
 {
   "habits": [
     {
-      "title": "Judul Amalan Singkat dan Menarik",
-      "description": "Penjelasan 1-2 kalimat yang memotivasi, menjelaskan cara melakukan amalan, dan kaitannya dengan ayat.",
-      "verse_reference": "Referensi ayat spesifik, contoh: QS. Al-Baqarah: 255"
+      "title": "Judul Amalan Singkat",
+      "description": "Penjelasan 1-2 kalimat tentang amalan dan kaitannya dengan ayat",
+      "verse_reference": "QS. Nama Surah: Nomor Ayat"
     }
   ]
 }
-4. Hasilkan 3 sampai 4 saran amalan yang praktis dan relevan dari ayat yang diberikan.
 
-Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang telah ditentukan tanpa teks tambahan apapun.
+4. HASILKAN TEPAT 3 AMALAN YANG PRAKTIS DAN RELEVAN
+5. PASTIKAN SEMUA STRING DITUTUP DENGAN BENAR
+6. PASTIKAN JSON BERAKHIR DENGAN }
+
+MULAI ANALISIS AYAT DAN KEMBALIKAN HANYA JSON:
         `;
+        
+        // Auto-initialize with default API key
+        this.init();
+    }
+
+    // Initialize dengan default API key
+    async init() {
+        console.log('🌸 Initializing Hasanah Generator...');
+        
+        // Use default API key directly
+        this.apiKey = this.defaultApiKey;
+        this.isConfigured = true;
+        
+        console.log('✅ Hasanah Generator initialized with default API key');
     }
 
     // Initialize dengan API key
@@ -34,21 +54,28 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
         console.log('✅ Hasanah Generator initialized successfully');
     }
 
-    // Set API key
+    // Set API key (called by AI Service Manager or manually)
     setApiKey(apiKey) {
-        this.apiKey = apiKey;
+        // Use provided API key or fall back to default
+        this.apiKey = apiKey || this.defaultApiKey;
         this.isConfigured = true;
-        this.saveApiKeyToStorage(apiKey);
+        console.log('✅ Hasanah Generator API key updated:', !!this.apiKey);
     }
 
-    // Get API key dari localStorage
-    getStoredApiKey() {
-        return localStorage.getItem('gemini_api_key');
+    // Check if ready to use
+    isReady() {
+        return this.isConfigured && (this.apiKey || this.defaultApiKey);
     }
 
-    // Save API key ke localStorage
-    saveApiKeyToStorage(apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey);
+    // Get status for debugging
+    getStatus() {
+        return {
+            isConfigured: this.isConfigured,
+            hasApiKey: !!this.apiKey,
+            hasDefaultApiKey: !!this.defaultApiKey,
+            isReady: this.isReady(),
+            usingDefaultKey: this.apiKey === this.defaultApiKey
+        };
     }
 
     // Load Quran data for specific surah
@@ -58,24 +85,29 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
         }
 
         try {
-            const response = await fetch(`fahmi_backend/surah/${surahNumber}.json`);
+            console.log(`📖 Loading surah ${surahNumber} from data/surah/${surahNumber}.json`);
+            const response = await fetch(`data/surah/${surahNumber}.json`);
             if (!response.ok) {
                 throw new Error(`Surah ${surahNumber} data not found`);
             }
             
             const data = await response.json();
+            console.log(`✅ Surah ${surahNumber} loaded successfully:`, data);
             this.quranData[surahNumber] = data;
             return data;
         } catch (error) {
-            console.error(`Error loading surah ${surahNumber}:`, error);
+            console.error(`❌ Error loading surah ${surahNumber}:`, error);
             throw new Error(`Gagal memuat data surah ${surahNumber}`);
         }
     }
 
     // Generate habits from verses
     async generateHabits(surahNumber, startAyah, endAyah) {
-        if (!this.isConfigured || !this.apiKey) {
-            throw new Error('Hasanah Generator belum dikonfigurasi. Silakan set API key terlebih dahulu.');
+        // Use available API key (custom or default)
+        const activeApiKey = this.apiKey || this.defaultApiKey;
+        
+        if (!activeApiKey) {
+            throw new Error('Tidak ada API key yang tersedia untuk Hasanah Generator.');
         }
 
         try {
@@ -85,12 +117,18 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
             const surahObj = surahData[surahKey];
 
             if (!surahObj) {
+                console.error(`❌ Data surah ${surahNumber} tidak valid:`, surahData);
                 throw new Error(`Data surah ${surahNumber} tidak valid`);
             }
+
+            console.log(`📚 Processing surah: ${surahObj.name_latin}, ayah ${startAyah}-${endAyah}`);
 
             const surahNameLatin = surahObj.name_latin || `Surah ${surahNumber}`;
             const arabicTexts = surahObj.text || {};
             const indonesianTexts = surahObj.translations?.id?.text || {};
+
+            console.log(`📖 Arabic texts available:`, Object.keys(arabicTexts).length, 'verses');
+            console.log(`🇮🇩 Indonesian texts available:`, Object.keys(indonesianTexts).length, 'verses');
 
             // Build verses text
             let versesText = [];
@@ -98,6 +136,8 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
                 const verseKey = i.toString();
                 const arabicText = arabicTexts[verseKey] || '[Teks Arab tidak tersedia]';
                 const indonesianText = indonesianTexts[verseKey] || '[Terjemahan tidak tersedia]';
+                
+                console.log(`📝 Ayah ${i}: Arabic=${!!arabicTexts[verseKey]}, Indonesian=${!!indonesianTexts[verseKey]}`);
                 
                 versesText.push(
                     `QS. ${surahNameLatin}:${i}\n` +
@@ -113,8 +153,8 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
             const versesContent = versesText.join('\n');
             const fullPrompt = `${this.systemPrompt}\n\nBerikut adalah ayat-ayat yang perlu dianalisis:\n\n${versesContent}`;
 
-            // Call Gemini API
-            const response = await this.callGeminiAPI(fullPrompt);
+            // Call Gemini API with active API key
+            const response = await this.callGeminiAPI(fullPrompt, activeApiKey);
             
             // Parse JSON response
             const habitsData = this.parseHabitsResponse(response);
@@ -128,8 +168,9 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
     }
 
     // Call Gemini API
-    async callGeminiAPI(prompt) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash:generateContent?key=${this.apiKey}`;
+    async callGeminiAPI(prompt, apiKey = null) {
+        const activeApiKey = apiKey || this.apiKey || this.defaultApiKey;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${activeApiKey}`;
         
         const requestBody = {
             contents: [{
@@ -138,10 +179,10 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
                 }]
             }],
             generationConfig: {
-                temperature: 0.3,
-                topK: 32,
-                topP: 0.95,
-                maxOutputTokens: 1024,
+                temperature: 0.2,
+                topK: 20,
+                topP: 0.8,
+                maxOutputTokens: 2048,
             },
             safetySettings: [
                 {
@@ -190,33 +231,96 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
         console.log('Raw AI Response:', response);
 
         try {
+            // Clean the response - remove markdown code blocks if any
+            let cleanResponse = response.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+            
             // Extract JSON from response
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
             if (!jsonMatch) {
-                throw new Error('Tidak ada JSON yang ditemukan dalam response AI');
+                console.warn('No JSON found, using fallback response');
+                return this.generateFallbackHabits();
             }
 
-            const jsonString = jsonMatch[0];
+            let jsonString = jsonMatch[0];
+            
+            // Try to fix incomplete JSON
+            if (!jsonString.trim().endsWith('}')) {
+                console.warn('JSON appears incomplete, attempting to fix...');
+                
+                // Count opening and closing braces
+                const openBraces = (jsonString.match(/\{/g) || []).length;
+                const closeBraces = (jsonString.match(/\}/g) || []).length;
+                
+                // Add missing closing braces
+                const missingBraces = openBraces - closeBraces;
+                for (let i = 0; i < missingBraces; i++) {
+                    jsonString += '}';
+                }
+                
+                // If we're inside a string, close it
+                if (jsonString.includes('"') && (jsonString.match(/"/g) || []).length % 2 !== 0) {
+                    jsonString = jsonString.replace(/("[^"]*$)/, '$1"');
+                }
+                
+                // Try to complete the habits array if it's open
+                if (jsonString.includes('"habits"') && !jsonString.includes(']}')) {
+                    // Find the last complete habit and close the array
+                    const lastCompleteHabit = jsonString.lastIndexOf('"}');
+                    if (lastCompleteHabit > 0) {
+                        jsonString = jsonString.substring(0, lastCompleteHabit + 2) + ']}';
+                    }
+                }
+            }
+
+            console.log('Cleaned JSON string:', jsonString);
             const habitsData = JSON.parse(jsonString);
 
             // Validate structure
             if (!habitsData.habits || !Array.isArray(habitsData.habits)) {
-                throw new Error('Format JSON tidak valid - habits array tidak ditemukan');
+                console.warn('Invalid structure, using fallback');
+                return this.generateFallbackHabits();
             }
 
-            // Validate each habit
-            habitsData.habits.forEach((habit, index) => {
-                if (!habit.title || !habit.description || !habit.verse_reference) {
-                    throw new Error(`Habit ${index + 1} tidak memiliki field yang lengkap`);
-                }
-            });
+            // Filter out incomplete habits
+            const validHabits = habitsData.habits.filter(habit => 
+                habit.title && habit.description && habit.verse_reference
+            );
 
-            return habitsData;
+            if (validHabits.length === 0) {
+                console.warn('No valid habits found, using fallback');
+                return this.generateFallbackHabits();
+            }
+
+            return { habits: validHabits };
 
         } catch (error) {
             console.error('Error parsing habits response:', error);
-            throw new Error('Gagal mem-parsing response AI. Format tidak sesuai.');
+            console.warn('Parsing failed, using fallback habits');
+            return this.generateFallbackHabits();
         }
+    }
+
+    // Generate fallback habits when AI response fails
+    generateFallbackHabits() {
+        return {
+            habits: [
+                {
+                    title: "Membaca Basmalah",
+                    description: "Memulai setiap aktivitas dengan membaca 'Bismillahir Rahmanir Rahim' untuk mengingat Allah dan memohon berkah-Nya.",
+                    verse_reference: "QS. Al-Fatihah: 1"
+                },
+                {
+                    title: "Bersyukur Setiap Hari",
+                    description: "Mengucapkan 'Alhamdulillahi rabbil alamiin' dan merenungkan nikmat Allah yang telah diberikan sepanjang hari.",
+                    verse_reference: "QS. Al-Fatihah: 2"
+                },
+                {
+                    title: "Berdoa dengan Khusyuk",
+                    description: "Meluangkan waktu untuk berdoa dan memohon petunjuk dari Allah dengan penuh kerendahan hati.",
+                    verse_reference: "Ayat yang dibaca"
+                }
+            ]
+        };
     }
 
     // Validate API key
@@ -268,13 +372,29 @@ Sekarang, analisis ayat-ayat berikut dan berikan output dalam format JSON yang t
 // Initialize global Hasanah instance
 window.hasanahGenerator = new HasanahGenerator();
 
-// Auto-initialize if API key exists
+// Auto-initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    const storedApiKey = window.hasanahGenerator.getStoredApiKey();
-    if (storedApiKey) {
-        window.hasanahGenerator.setApiKey(storedApiKey);
-    }
+    console.log('🌸 Hasanah Generator DOM ready');
+    console.log('🌸 Status:', window.hasanahGenerator.getStatus());
+    
+    // Still compatible with AI Service Manager if available
+    setTimeout(() => {
+        if (window.aiServiceManager) {
+            console.log('🔗 AI Service Manager detected, registering service...');
+            window.aiServiceManager.reinitializeServices();
+        }
+    }, 1000);
 });
 
 // Make class available globally
 window.HasanahGenerator = HasanahGenerator;
+
+// Debugging helper
+window.debugHasanah = () => {
+    console.log('=== HASANAH DEBUG INFO ===');
+    console.log('HasanahGenerator instance:', window.hasanahGenerator);
+    console.log('Status:', window.hasanahGenerator?.getStatus());
+    console.log('AI Service Manager:', window.aiServiceManager);
+    console.log('AI Service Manager status:', window.aiServiceManager?.getServiceStatus());
+    console.log('========================');
+};

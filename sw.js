@@ -1,21 +1,26 @@
-const CACHE_NAME = 'hidayahpath-v1.0.1';
-const STATIC_CACHE = 'hidayahpath-static-v1.0.1';
-const DYNAMIC_CACHE = 'hidayahpath-dynamic-v1.0.1';
-const APP_VERSION = '1.0.1';
+const CACHE_NAME = 'hidayahpath-v1.0.2';
+const STATIC_CACHE = 'hidayahpath-static-v1.0.2';
+const DYNAMIC_CACHE = 'hidayahpath-dynamic-v1.0.2';
+const APP_VERSION = '1.0.2';
 
 // Files to cache immediately
 const STATIC_FILES = [
-  '/hudaverse/',
-  '/hudaverse/index.html',
-  '/hudaverse/alquran.html',
-  '/hudaverse/fahmi.html',
-  '/hudaverse/hasanah.html',
-  '/hudaverse/studio.html',
-  '/hudaverse/manifest.json',
-  '/hudaverse/logo.png',
-  '/hudaverse/latarbelakang.jpg',
-  '/hudaverse/js/quran-data.js',
-  '/hudaverse/js/streak-manager.js',
+  '/',
+  '/index.html',
+  '/alquran.html',
+  '/fahmi.html',
+  '/hasanah.html',
+  '/studio.html',
+  '/manifest.json',
+  '/logo.png',
+  '/latarbelakang.jpg',
+  '/js/quran-data.js',
+  '/js/streak-manager.js',
+  '/js/pwa-manager.js',
+  '/js/update-manager.js',
+  '/js/ai-service-manager.js',
+  '/js/fahmi-chatbot.js',
+  '/js/hasanah-generator.js',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@latest',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap'

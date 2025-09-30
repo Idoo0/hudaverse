@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <div id="output"></div>
+
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/fahmi-chatbot.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const output = document.getElementById('output');
+            
+            try {
+                output.innerHTML += '<p>Starting tests...</p>';
+                
+                // Test if classes are defined
+                output.innerHTML += `<p>AIServiceManager class exists: ${typeof AIServiceManager !== 'undefined'}</p>`;
+                output.innerHTML += `<p>FahmiChatbot class exists: ${typeof FahmiChatbot !== 'undefined'}</p>`;
+                
+                // Test global instances
+                output.innerHTML += `<p>window.aiServiceManager exists: ${!!window.aiServiceManager}</p>`;
+                output.innerHTML += `<p>window.fahmiChatbot exists: ${!!window.fahmiChatbot}</p>`;
+                
+                // Wait for initialization
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Test AI Service Manager
+                const aiServiceManager = window.aiServiceManager;
+                output.innerHTML += '<p>✅ AIServiceManager accessed</p>';
+                output.innerHTML += `<p>AI Service configured: ${aiServiceManager?.isConfigured}</p>`;
+                output.innerHTML += `<p>API Key exists: ${!!aiServiceManager?.apiKey}</p>`;
+                output.innerHTML += `<p>Default API Key: ${aiServiceManager?.defaultApiKey?.substring(0, 10)}...</p>`;
+                
+                // Test Fahmi Chatbot
+                const fahmiChatbot = window.fahmiChatbot;
+                output.innerHTML += '<p>✅ FahmiChatbot accessed</p>';
+                output.innerHTML += `<p>Fahmi configured: ${fahmiChatbot?.isConfigured}</p>`;
+                
+            } catch (error) {
+                output.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+                console.error('Debug error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- Base URL for GitHub Pages -->
+    <!-- <base href="/hudaverse/"> (Commented for local development) -->
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HidayahPath">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fahmi (AI Mufti) - HidayahPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/fahmi-chatbot.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,6 +31,73 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Improved chat message formatting */
+        #chat-window h2, #chat-window h3, #chat-window h4 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        #chat-window strong {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        #chat-window em {
+            font-style: italic;
+            color: #475569;
+        }
+        #chat-window code {
+            font-family: 'Courier New', monospace;
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            border: 1px solid #e5e7eb;
+        }
+        #chat-window p {
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+        /* List styling improvements */
+        #chat-window .ml-4 {
+            margin-left: 1rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.5;
+        }
+        /* Better spacing for chat bubbles */
+        .max-w-md {
+            max-width: 28rem;
+        }
+        /* Improved chat window layout */
+        #chat-window {
+            padding: 1rem;
+        }
+        /* Better scrollbar */
+        #chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-window::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        #chat-window::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Typing indicator animation */
+        .typing-indicator {
+            animation: blink 1s infinite;
+            color: #10b981;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased">
 
@@ -43,6 +122,9 @@
                         <button id="send-btn" class="bg-emerald-500 text-white rounded-full p-3 hover:bg-emerald-600 transition-colors disabled:bg-emerald-300">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
+                        <button id="settings-btn" class="bg-gray-500 text-white rounded-full p-3 hover:bg-gray-600 transition-colors" title="AI Settings">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -62,93 +144,9 @@
     </nav>
     
     <script>
+        // Logika navbar aktif
+        const currentPage = 'fahmi';
         document.addEventListener('DOMContentLoaded', () => {
-            // Inisialisasi Ikon Lucide
-            lucide.createIcons();
-
-            const chatWindow = document.getElementById('chat-window');
-            const chatInput = document.getElementById('chat-input');
-            const sendBtn = document.getElementById('send-btn');
-            const API_URL = 'http://127.0.0.1:5000/api/chat';
-
-            const addMessageToChat = (message, sender) => {
-                const messageDiv = document.createElement('div');
-                let messageBubble;
-
-                if (sender === 'user') {
-                    messageDiv.className = "flex items-start gap-3 justify-end";
-                    messageBubble = `<div class="bg-emerald-500 text-white p-3 rounded-lg max-w-md"><p>${message}</p></div>
-                                     <div class="p-2 bg-slate-200 text-slate-600 rounded-full flex-shrink-0"><i data-lucide="user" class="w-5 h-5"></i></div>`;
-                } else { // bot
-                    // Ganti markdown sederhana ke HTML
-                    let formattedMessage = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                                                 .replace(/\n/g, '<br>'); // Newlines
-
-                    messageDiv.className = "flex items-start gap-3 justify-start";
-                    messageBubble = `<div class="p-2 bg-emerald-500 text-white rounded-full flex-shrink-0"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
-                                     <div class="bg-slate-100 p-3 rounded-lg max-w-md">${formattedMessage}</div>`;
-                }
-                
-                messageDiv.innerHTML = messageBubble;
-                chatWindow.appendChild(messageDiv);
-                lucide.createIcons();
-                chatWindow.scrollTop = chatWindow.scrollHeight; // Auto scroll to bottom
-            };
-
-            const toggleLoadingState = (isLoading) => {
-                chatInput.disabled = isLoading;
-                sendBtn.disabled = isLoading;
-                if(isLoading) {
-                    sendBtn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 animate-spin"></i>`;
-                } else {
-                    sendBtn.innerHTML = `<i data-lucide="send" class="w-5 h-5"></i>`;
-                }
-                lucide.createIcons();
-            };
-
-            const handleSend = async () => {
-                const userMessage = chatInput.value.trim();
-                if (!userMessage) return;
-
-                addMessageToChat(userMessage, 'user');
-                chatInput.value = '';
-                toggleLoadingState(true);
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ prompt: userMessage })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    addMessageToChat(data.response, 'bot');
-
-                } catch (error) {
-                    console.error("Fetch error:", error);
-                    addMessageToChat("Maaf, terjadi kesalahan saat menyambungkan ke server. Silakan coba lagi nanti.", 'bot');
-                } finally {
-                    toggleLoadingState(false);
-                    chatInput.focus();
-                }
-            };
-
-            sendBtn.addEventListener('click', handleSend);
-            chatInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                }
-            });
-
-            // Logika navbar aktif (disalin dari file lain)
-            const currentPage = 'fahmi';
             const activeLink = document.querySelector(`.nav-link[data-page="${currentPage}"]`);
             if (activeLink) {
                 activeLink.classList.remove('text-slate-500');

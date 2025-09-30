@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- Base URL for GitHub Pages -->
+    <!-- <base href="/hudaverse/"> (Commented for local development) -->
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HidayahPath">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasanah - HidayahPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/hasanah-generator.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -83,8 +95,12 @@
         </div>
     </nav>
     
+    <!-- JavaScript modules -->
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/hasanah-generator.js"></script>
+    
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         lucide.createIcons();
 
         // --- DOM ELEMENTS ---
@@ -94,7 +110,23 @@
         const generateBtn = document.getElementById('generate-btn');
         const resultContainer = document.getElementById('habits-result-container');
         const myHabitsContainer = document.getElementById('my-habits-container');
-        const API_URL = 'http://127.0.0.1:5000/api/generate-habits';
+        
+        // Initialize AI service manager and hasanah generator
+        const aiServiceManager = new AIServiceManager();
+        let hasanahGenerator = null;
+        
+        // Initialize hasanah generator
+        try {
+            hasanahGenerator = new HasanahGenerator();
+            await hasanahGenerator.init();
+        } catch (error) {
+            console.error('Failed to initialize Hasanah Generator:', error);
+            resultContainer.innerHTML = `
+                <div class="text-center p-8 bg-red-100 text-red-700 rounded-lg">
+                    <p>Gagal menginisialisasi generator hasanah. Silakan refresh halaman.</p>
+                </div>
+            `;
+        }
         
         // --- STATE & CACHE MANAGEMENT ---
         let currentGeneratedHabits = [];
@@ -191,34 +223,49 @@
                 return; 
             }
 
+            // Check if API key is configured
+            if (!aiServiceManager || !aiServiceManager.isConfigured) {
+                resultContainer.innerHTML = `
+                    <div class="text-center p-8 bg-yellow-100 text-yellow-700 rounded-lg">
+                        <p>API key belum dikonfigurasi. Sistem sedang memuat...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!hasanahGenerator) {
+                resultContainer.innerHTML = `
+                    <div class="text-center p-8 bg-red-100 text-red-700 rounded-lg">
+                        <p>Generator hasanah belum siap. Silakan refresh halaman.</p>
+                    </div>
+                `;
+                return;
+            }
+
             toggleLoadingState(true);
             resultContainer.innerHTML = `<div class="text-center p-8 text-slate-500 bg-white/50 rounded-lg"><div class="flex items-center justify-center gap-2"><i data-lucide="loader-circle" class="w-6 h-6 animate-spin"></i><p>Menganalisis ayat dan mencari inspirasi...</p></div></div>`;
             lucide.createIcons();
 
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        surah_number: parseInt(surahNumber),
-                        start_ayah: parseInt(startAyah),
-                        end_ayah: parseInt(endAyah)
-                    })
-                });
-
-                const data = await response.json();
+                const habits = await hasanahGenerator.generateHabits(parseInt(surahNumber), parseInt(startAyah), parseInt(endAyah));
                 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Terjadi kesalahan pada server.');
-                }
-                
-                currentGeneratedHabits = data.habits;
+                currentGeneratedHabits = habits;
                 saveToCache('generatedHabits', currentGeneratedHabits);
                 renderGeneratedHabits();
 
             } catch (error) {
-                console.error("Fetch Error:", error);
-                resultContainer.innerHTML = `<div class="text-center p-8 bg-red-100 text-red-700 rounded-lg"><p>Gagal mendapatkan saran amalan: ${error.message}</p></div>`;
+                console.error("Generate Habits Error:", error);
+                let errorMessage = 'Terjadi kesalahan saat generate amalan.';
+                
+                if (error.message.includes('API key')) {
+                    errorMessage = 'API key tidak valid. Silakan periksa konfigurasi.';
+                } else if (error.message.includes('quota')) {
+                    errorMessage = 'Kuota API telah habis. Silakan coba lagi nanti.';
+                } else if (error.message.includes('network')) {
+                    errorMessage = 'Koneksi internet bermasalah. Silakan coba lagi.';
+                }
+                
+                resultContainer.innerHTML = `<div class="text-center p-8 bg-red-100 text-red-700 rounded-lg"><p>${errorMessage}</p></div>`;
             } finally {
                 toggleLoadingState(false);
             }

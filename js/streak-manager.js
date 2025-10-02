@@ -100,7 +100,8 @@ class StreakManager {
 
         } catch (error) {
             console.error('Error loading surah list:', error);
-            this.showError('Gagal memuat daftar surah');
+            // Log error instead of showing alert
+            console.log('Failed to load surah list');
         }
     }
 
@@ -177,7 +178,8 @@ class StreakManager {
                 console.error('Fallback also failed:', fallbackError);
             }
             
-            this.showError('Gagal memuat surah acak: ' + error.message);
+            // Log error instead of showing alert
+            console.log('Failed to load random surah:', error.message);
         }
     }
 
@@ -274,7 +276,8 @@ class StreakManager {
 
         } catch (error) {
             console.error('Error starting recording:', error);
-            this.showError('Gagal mengakses mikrofon. Pastikan Anda memberikan izin akses mikrofon.');
+            // Log error instead of showing alert
+            console.log('Microphone access denied or unavailable');
         }
     }
 
@@ -377,18 +380,14 @@ class StreakManager {
             });
 
         } catch (error) {
-            console.error('Error analyzing recording:', error);
             
             // Fallback to mock analysis if AI fails
-            console.log('Falling back to mock analysis...');
             const mockAccuracy = 80 + Math.random() * 15; // 80-95%
             const feedback = this.generateMockFeedback(mockAccuracy);
             this.displayAnalysisResult(mockAccuracy, feedback);
             
-            // Show warning about AI service
-            setTimeout(() => {
-                this.showError('AI Analysis menggunakan mode offline. ' + error.message);
-            }, 1000);
+            // Just log error, no annoying popup
+            console.log('AI Analysis fallback mode:', error.message);
 
         } finally {
             if (analyzeBtn) {
@@ -530,34 +529,17 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
             }
         }
 
+        // Simple feedback display - only percentage focused
         if (aiFeedback) {
-            let feedbackHtml = `<div class="text-slate-700 mb-3">${feedback}</div>`;
-            
-            // Add additional information if available
-            if (additionalInfo) {
-                if (additionalInfo.suggestions) {
-                    feedbackHtml += `<div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <div class="text-sm font-semibold text-blue-800 mb-1">💡 Saran Perbaikan:</div>
-                        <div class="text-sm text-blue-700">${additionalInfo.suggestions}</div>
-                    </div>`;
-                }
-                
-                if (additionalInfo.makhraj_notes) {
-                    feedbackHtml += `<div class="mt-3 p-3 bg-green-50 rounded-lg">
-                        <div class="text-sm font-semibold text-green-800 mb-1">🗣️ Catatan Makhraj:</div>
-                        <div class="text-sm text-green-700">${additionalInfo.makhraj_notes}</div>
-                    </div>`;
-                }
-                
-                if (additionalInfo.tajwid_tips) {
-                    feedbackHtml += `<div class="mt-3 p-3 bg-purple-50 rounded-lg">
-                        <div class="text-sm font-semibold text-purple-800 mb-1">📚 Tips Tajwid:</div>
-                        <div class="text-sm text-purple-700">${additionalInfo.tajwid_tips}</div>
-                    </div>`;
-                }
+            let simpleFeedback = '';
+            if (accuracy >= 90) {
+                simpleFeedback = 'Excellent! 🎯';
+            } else if (accuracy >= 80) {
+                simpleFeedback = 'Good! 👍';
+            } else {
+                simpleFeedback = 'Keep practicing! 📖';
             }
-            
-            aiFeedback.innerHTML = feedbackHtml;
+            aiFeedback.innerHTML = `<div class="text-lg font-semibold text-center">${simpleFeedback}</div>`;
         }
 
         analysisResult.classList.remove('hidden');
@@ -603,8 +585,8 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
         this.updateStreakDisplay();
         this.updateRecentSessions();
 
-        // Show success message
-        this.showSuccess('Alhamdulillah! Sesi hari ini telah diselesaikan. Streak Anda bertambah!');
+        // Just log success, no popup
+        console.log('Session completed successfully! Streak updated.');
 
         // Reset UI
         setTimeout(() => {
@@ -743,14 +725,14 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
     // Show error message
     showError(message) {
-        // Simple alert for now, can be enhanced with better UI
-        alert(message);
+        console.log('Error:', message);
+        // No more annoying alerts
     }
 
     // Show success message
     showSuccess(message) {
-        // Simple alert for now, can be enhanced with better UI
-        alert(message);
+        console.log('Success:', message);
+        // No more annoying alerts
     }
 
     // Clear all streak data (for testing/reset)

@@ -138,7 +138,7 @@ class QuranDataManager {
         this.loadingSurah.add(nomorSurah);
 
         try {
-            const response = await fetch(`fahmi_backend/surah/${nomorSurah}.json`);
+            const response = await fetch(`data/surah/${nomorSurah}.json`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

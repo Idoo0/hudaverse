@@ -49,7 +49,7 @@ class StreakManager {
         // Generate new daily verse
         const surahNumber = Math.floor(Math.random() * 114) + 1;
         try {
-            const response = await fetch(`fahmi_backend/surah/${surahNumber}.json`);
+            const response = await fetch(`data/surah/${surahNumber}.json`);
             const data = await response.json();
             const surahData = data[surahNumber];
             

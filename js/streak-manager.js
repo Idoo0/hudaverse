@@ -371,8 +371,16 @@ class StreakManager {
     // Display selected verse
     displayVerse() {
         if (!this.selectedVerse) {
+            console.warn('⚠️ No selectedVerse available for display');
             return;
         }
+
+        console.log('📺 === DISPLAYING VERSE ===');
+        console.log('📺 selectedVerse data:');
+        console.log('  - Surah:', this.selectedVerse.surah, this.selectedVerse.surahName);
+        console.log('  - Ayah:', this.selectedVerse.ayah);
+        console.log('  - Arabic:', this.selectedVerse.arabic?.substring(0, 50) + '...');
+        console.log('  - Translation:', this.selectedVerse.translation?.substring(0, 50) + '...');
 
         const verseDisplay = document.getElementById('verse-display');
         const verseReference = document.getElementById('verse-reference');
@@ -380,20 +388,27 @@ class StreakManager {
         const verseTranslation = document.getElementById('verse-translation');
 
         if (verseReference) {
-            verseReference.textContent = `QS. ${this.selectedVerse.surahName} (${this.selectedVerse.surah}): ${this.selectedVerse.ayah}`;
+            const referenceText = `QS. ${this.selectedVerse.surahName} (${this.selectedVerse.surah}): ${this.selectedVerse.ayah}`;
+            verseReference.textContent = referenceText;
+            console.log('📺 Reference set to:', referenceText);
         }
 
         if (verseArabic) {
             verseArabic.textContent = this.selectedVerse.arabic;
+            console.log('📺 Arabic text set');
         }
 
         if (verseTranslation) {
             verseTranslation.textContent = this.selectedVerse.translation;
+            console.log('📺 Translation set');
         }
 
         if (verseDisplay) {
             verseDisplay.classList.remove('hidden');
+            console.log('📺 Verse display shown');
         }
+        
+        console.log('📺 === VERSE DISPLAY COMPLETE ===');
     }
 
     // Toggle voice recording
@@ -508,20 +523,6 @@ class StreakManager {
             console.log('  - this.selectedVerse.ayah:', this.selectedVerse?.ayah);
             console.log('  - this.selectedVerse.surahName:', this.selectedVerse?.surahName);
             console.log('  - this.selectedVerse.arabic:', this.selectedVerse?.arabic?.substring(0, 50) + '...');
-            
-            // Validate parameters match selected verse
-            if (this.selectedVerse) {
-                if (surahNumber !== this.selectedVerse.surah) {
-                    console.error('❌ PARAMETER MISMATCH - SURAH:');
-                    console.error('  Expected:', this.selectedVerse.surah, this.selectedVerse.surahName);
-                    console.error('  Received:', surahNumber);
-                }
-                if (ayatNumber !== this.selectedVerse.ayah) {
-                    console.error('❌ PARAMETER MISMATCH - AYAT:');
-                    console.error('  Expected:', this.selectedVerse.ayah);
-                    console.error('  Received:', ayatNumber);
-                }
-            }
 
             // Get AI Service Manager instance
             const aiService = window.aiServiceManager;
@@ -541,16 +542,12 @@ class StreakManager {
             
             const apiKey = aiService.apiKey;
             
-            // Use CORRECT parameters from selectedVerse
-            const correctSurah = this.selectedVerse.surah;
-            const correctAyat = this.selectedVerse.ayah;
-            const correctSurahName = this.selectedVerse.surahName;
-            
-            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${correctSurah}, ayat: ${correctAyat}. jawab dengan Ya atau Tidak hanya 1 kata itu. ingat harus tergabung pada surah dan ayat tersebut`;
+            // Use the parameters that were passed in (should match selectedVerse)
+            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${surahNumber}, ayat: ${ayatNumber}. jawab dengan Ya atau Tidak hanya 1 kata itu`;
 
-            console.log('📝 CORRECTED PROMPT:');
-            console.log('  - Using Surah:', correctSurah, '(' + correctSurahName + ')');
-            console.log('  - Using Ayat:', correctAyat);
+            console.log('📝 PROMPT USED:');
+            console.log('  - Using Surah:', surahNumber);
+            console.log('  - Using Ayat:', ayatNumber);
             console.log('  - Full prompt:', prompt);
 
             const requestBody = {
@@ -633,19 +630,27 @@ class StreakManager {
         console.log('🎬 Starting analyze recording...');
         console.log('🎬 Current timestamp:', new Date().toISOString());
         
-        if (!this.selectedVerse) {
-            console.error('❌ No verse selected');
-            this.showError('Belum ada ayat yang dipilih');
+        // Debug selectedVerse IMMEDIATELY at start
+        console.log('🔍 === IMMEDIATE SELECTEDVERSE CHECK ===');
+        if (this.selectedVerse) {
+            console.log('✅ selectedVerse exists:');
+            console.log('  - Surah:', this.selectedVerse.surah, '(' + this.selectedVerse.surahName + ')');
+            console.log('  - Ayah:', this.selectedVerse.ayah);
+            console.log('  - Arabic (first 50 chars):', this.selectedVerse.arabic?.substring(0, 50));
+        } else {
+            console.error('❌ selectedVerse is null/undefined!');
+            this.showError('Data ayat hilang! Silakan muat ulang halaman.');
             return;
         }
-
+        
         if (!this.recordedAudioBlob) {
             console.error('❌ No audio recorded');
             this.showError('Belum ada rekaman audio');
             return;
         }
 
-        console.log('📋 Selected verse:', this.selectedVerse);
+        console.log('📋 Selected verse verification passed');
+        console.log('🎵 Audio blob verification passed:', this.recordedAudioBlob.size, 'bytes');
 
         const analyzeBtn = document.getElementById('analyze-btn');
         if (analyzeBtn) {
@@ -662,10 +667,10 @@ class StreakManager {
             console.log('  - Arabic text:', this.selectedVerse.arabic?.substring(0, 100) + '...');
             console.log('  - Audio size:', this.recordedAudioBlob.size);
             
-            // Use the new evaluateStreak function with CORRECT parameters
+            // Use selectedVerse data directly - no parameter correction needed
             const isCorrect = await this.evaluateStreak(
-                this.selectedVerse.surah,  // Use correct surah number
-                this.selectedVerse.ayah,   // Use correct ayat number
+                this.selectedVerse.surah,
+                this.selectedVerse.ayah,
                 this.recordedAudioBlob
             );
 

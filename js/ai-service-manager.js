@@ -8,22 +8,39 @@ class AIServiceManager {
             hasanah: null
         };
         
+        // Check if in development mode
+        this.isDevelopment = this.checkDevelopmentMode();
+        
         // Hardcoded API key for development (remove in production)
         this.defaultApiKey = "AIzaSyAxGvhjqziXocgMKLyqanpyxdIcMMnSWdY";
         
         this.init();
     }
 
+    // Check if running in development mode
+    checkDevelopmentMode() {
+        return window.location.hostname === 'localhost' || 
+               window.location.hostname === '127.0.0.1' || 
+               window.location.hostname === '' ||
+               window.location.protocol === 'file:' ||
+               window.location.port !== '';
+    }
+
     async init() {
-        console.log('🤖 Initializing AI Service Manager...');
+        const modeText = this.isDevelopment ? '🔧 DEVELOPMENT MODE' : '🚀 PRODUCTION MODE';
+        console.log('🤖 Initializing AI Service Manager...', modeText);
         
         // Load stored API key or use default
         const storedApiKey = this.getStoredApiKey() || this.defaultApiKey;
-        console.log('🔑 Found API key:', !!storedApiKey, storedApiKey?.substring(0, 15) + '...');
+        
+        if (this.isDevelopment) {
+            console.log('🔑 Found API key:', !!storedApiKey, storedApiKey?.substring(0, 15) + '...');
+        }
         
         if (storedApiKey) {
-            // For development, skip validation and set directly
-            console.log('🚀 Setting API key directly (development mode)');
+            if (this.isDevelopment) {
+                console.log('🚀 Setting API key directly (development mode)');
+            }
             this.apiKey = storedApiKey;
             this.isConfigured = true;
             

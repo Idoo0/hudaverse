@@ -7,6 +7,7 @@ class StreakManager {
         this.streakData = this.loadStreakData();
         this.surahList = [];
         this.selectedVerse = null;
+        this.isAnalyzing = false; // Flag to prevent verse changes during analysis
         
         this.init();
     }
@@ -302,6 +303,12 @@ class StreakManager {
 
     // Load new verse manually
     async loadNewVerse() {
+        // Prevent loading new verse during analysis
+        if (this.isAnalyzing) {
+            console.log('⚠️ Cannot load new verse - analysis in progress');
+            return;
+        }
+        
         const newVerseBtn = document.getElementById('new-verse-btn');
         if (newVerseBtn) {
             newVerseBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 inline animate-spin"></i>Loading...';
@@ -518,11 +525,22 @@ class StreakManager {
             console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
             console.log('🎵 Audio type:', audioBlob.type);
             
-            console.log('📋 CURRENT SELECTED VERSE:');
+            console.log('📋 CURRENT SELECTED VERSE (for comparison):');
             console.log('  - this.selectedVerse.surah:', this.selectedVerse?.surah);
             console.log('  - this.selectedVerse.ayah:', this.selectedVerse?.ayah);
             console.log('  - this.selectedVerse.surahName:', this.selectedVerse?.surahName);
             console.log('  - this.selectedVerse.arabic:', this.selectedVerse?.arabic?.substring(0, 50) + '...');
+            
+            console.log('🔍 === PARAMETER VS SELECTEDVERSE COMPARISON ===');
+            if (this.selectedVerse) {
+                const paramMatch = (surahNumber === this.selectedVerse.surah && ayatNumber === this.selectedVerse.ayah);
+                console.log('  - Parameters match selectedVerse:', paramMatch);
+                if (!paramMatch) {
+                    console.error('⚠️ MISMATCH DETECTED!');
+                    console.error('  - Expected: Surah', this.selectedVerse.surah, 'Ayah', this.selectedVerse.ayah);
+                    console.error('  - Received: Surah', surahNumber, 'Ayah', ayatNumber);
+                }
+            }
 
             // Get AI Service Manager instance
             const aiService = window.aiServiceManager;
@@ -542,12 +560,12 @@ class StreakManager {
             
             const apiKey = aiService.apiKey;
             
-            // Use the parameters that were passed in (should match selectedVerse)
-            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${surahNumber}, ayat: ${ayatNumber}. jawab dengan Ya atau Tidak hanya 1 kata itu`;
+            // Use the parameters that were passed in (frozen from analyzeRecording)
+            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${surahNumber}, ayat: ${ayatNumber}. jawab dengan Ya atau Tidak hanya 1 kata itu. ingat harus tergabung pada surah dan ayat tersebut`;
 
-            console.log('📝 PROMPT USED:');
-            console.log('  - Using Surah:', surahNumber);
-            console.log('  - Using Ayat:', ayatNumber);
+            console.log('📝 CORRECTED PROMPT:');
+            console.log('  - Using Surah:', surahNumber, typeof surahNumber);
+            console.log('  - Using Ayat:', ayatNumber, typeof ayatNumber);
             console.log('  - Full prompt:', prompt);
 
             const requestBody = {
@@ -630,13 +648,16 @@ class StreakManager {
         console.log('🎬 Starting analyze recording...');
         console.log('🎬 Current timestamp:', new Date().toISOString());
         
+        // IMPORTANT: Freeze selectedVerse to prevent changes during analysis
+        const frozenSelectedVerse = this.selectedVerse ? { ...this.selectedVerse } : null;
+        
         // Debug selectedVerse IMMEDIATELY at start
         console.log('🔍 === IMMEDIATE SELECTEDVERSE CHECK ===');
-        if (this.selectedVerse) {
-            console.log('✅ selectedVerse exists:');
-            console.log('  - Surah:', this.selectedVerse.surah, '(' + this.selectedVerse.surahName + ')');
-            console.log('  - Ayah:', this.selectedVerse.ayah);
-            console.log('  - Arabic (first 50 chars):', this.selectedVerse.arabic?.substring(0, 50));
+        if (frozenSelectedVerse) {
+            console.log('✅ selectedVerse exists and frozen:');
+            console.log('  - Surah:', frozenSelectedVerse.surah, '(' + frozenSelectedVerse.surahName + ')');
+            console.log('  - Ayah:', frozenSelectedVerse.ayah);
+            console.log('  - Arabic (first 50 chars):', frozenSelectedVerse.arabic?.substring(0, 50));
         } else {
             console.error('❌ selectedVerse is null/undefined!');
             this.showError('Data ayat hilang! Silakan muat ulang halaman.');
@@ -652,6 +673,9 @@ class StreakManager {
         console.log('📋 Selected verse verification passed');
         console.log('🎵 Audio blob verification passed:', this.recordedAudioBlob.size, 'bytes');
 
+        // Set analysis flag to prevent verse changes
+        this.isAnalyzing = true;
+
         const analyzeBtn = document.getElementById('analyze-btn');
         if (analyzeBtn) {
             console.log('🔄 Setting button to loading state...');
@@ -661,16 +685,16 @@ class StreakManager {
 
         try {
             console.log('🚀 === CALLING EVALUATE STREAK ===');
-            console.log('🚀 Current selectedVerse:');
-            console.log('  - Surah:', this.selectedVerse.surah, '(' + this.selectedVerse.surahName + ')');
-            console.log('  - Ayah:', this.selectedVerse.ayah);
-            console.log('  - Arabic text:', this.selectedVerse.arabic?.substring(0, 100) + '...');
+            console.log('🚀 Using frozen selectedVerse:');
+            console.log('  - Surah:', frozenSelectedVerse.surah, '(' + frozenSelectedVerse.surahName + ')');
+            console.log('  - Ayah:', frozenSelectedVerse.ayah);
+            console.log('  - Arabic text:', frozenSelectedVerse.arabic?.substring(0, 100) + '...');
             console.log('  - Audio size:', this.recordedAudioBlob.size);
             
-            // Use selectedVerse data directly - no parameter correction needed
+            // Use frozen selectedVerse data to prevent race conditions
             const isCorrect = await this.evaluateStreak(
-                this.selectedVerse.surah,
-                this.selectedVerse.ayah,
+                frozenSelectedVerse.surah,
+                frozenSelectedVerse.ayah,
                 this.recordedAudioBlob
             );
 
@@ -718,6 +742,10 @@ class StreakManager {
 
         } finally {
             console.log('🔄 === RESTORING BUTTON STATE ===');
+            
+            // Reset analysis flag
+            this.isAnalyzing = false;
+            
             if (analyzeBtn) {
                 analyzeBtn.innerHTML = '<i data-lucide="brain" class="w-4 h-4 mr-2 inline"></i>Evaluasi Streak';
                 analyzeBtn.disabled = false;
@@ -966,6 +994,12 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
     // Complete today's session
     completeSession() {
+        // Prevent completing session during analysis
+        if (this.isAnalyzing) {
+            console.log('⚠️ Cannot complete session - analysis in progress');
+            return;
+        }
+        
         if (!this.selectedVerse) {
             this.showError('Belum ada ayat yang dipilih');
             return;
@@ -1139,9 +1173,14 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
         this.recordedAudioBlob = null;
         
-        // Only load new surah if no verse is currently displayed
-        if (!this.selectedVerse) {
+        // Prevent loading new verse if currently analyzing or if verse already exists
+        if (!this.isAnalyzing && !this.selectedVerse) {
+            console.log('🔄 Loading new verse in resetSession...');
             this.loadRandomSurah();
+        } else if (this.isAnalyzing) {
+            console.log('⚠️ Skipping verse reload - analysis in progress');
+        } else {
+            console.log('⚠️ Skipping verse reload - verse already exists');
         }
     }
 

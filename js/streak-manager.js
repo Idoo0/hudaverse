@@ -8,23 +8,7 @@ class StreakManager {
         this.surahList = [];
         this.selectedVerse = null;
         
-        // Development mode settings
-        this.isDevelopment = this.checkDevelopmentMode();
-        if (this.isDevelopment) {
-            console.log('🔧 DEVELOPMENT MODE ENABLED');
-            console.log('📍 Current location:', window.location.href);
-        }
-        
         this.init();
-    }
-
-    // Check if running in development mode
-    checkDevelopmentMode() {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1' || 
-               window.location.hostname === '' ||
-               window.location.protocol === 'file:' ||
-               window.location.port !== '';
     }
 
     // Initialize the app
@@ -213,6 +197,7 @@ class StreakManager {
         const analyzeBtn = document.getElementById('analyze-btn');
         const retryBtn = document.getElementById('retry-btn');
         const completeBtn = document.getElementById('complete-session-btn');
+        const newVerseBtn = document.getElementById('new-verse-btn');
 
         if (recordBtn) {
             recordBtn.addEventListener('click', () => this.toggleRecording());
@@ -228,6 +213,33 @@ class StreakManager {
 
         if (completeBtn) {
             completeBtn.addEventListener('click', () => this.completeSession());
+        }
+
+        if (newVerseBtn) {
+            newVerseBtn.addEventListener('click', () => this.loadNewVerse());
+        }
+    }
+
+    // Load new verse manually
+    async loadNewVerse() {
+        const newVerseBtn = document.getElementById('new-verse-btn');
+        if (newVerseBtn) {
+            newVerseBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 inline animate-spin"></i>Loading...';
+        }
+
+        // Reset current session
+        this.resetSession();
+        
+        // Load new random verse
+        await this.loadRandomSurah();
+
+        if (newVerseBtn) {
+            newVerseBtn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4 mr-2 inline"></i>Ayat Baru';
+        }
+
+        // Refresh lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     }
 
@@ -361,20 +373,9 @@ class StreakManager {
     // Evaluate streak using Google Generative AI
     async evaluateStreak(surahNumber, ayatNumber, audioBlob) {
         try {
-            if (this.isDevelopment) {
-                console.log('🔍 Development Mode - Evaluating streak...');
-                console.log('📄 Surah:', surahNumber, 'Ayat:', ayatNumber);
-                console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
-                console.log('🎵 Audio type:', audioBlob.type);
-            }
-
             // Get AI Service Manager instance
             const aiService = window.aiServiceManager;
             if (!aiService || !aiService.isConfigured) {
-                if (this.isDevelopment) {
-                    console.warn('⚠️ AI Service tidak tersedia - menggunakan fallback untuk development');
-                    return Math.random() > 0.3; // 70% success rate for development testing
-                }
                 throw new Error('AI Service tidak tersedia atau belum dikonfigurasi');
             }
 
@@ -385,16 +386,8 @@ class StreakManager {
             // Convert to base64 for API call
             const base64Audio = btoa(String.fromCharCode.apply(null, audioBytes));
             
-            if (this.isDevelopment) {
-                console.log('📊 Base64 audio length:', base64Audio.length);
-            }
-            
             const apiKey = aiService.apiKey;
             const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${surahNumber}, ayat: ${ayatNumber}. jawab dengan Ya atau Tidak hanya 1 kata itu. ingat harus tergabung pada surah dan ayat tersebut`;
-
-            if (this.isDevelopment) {
-                console.log('📝 Prompt sent to AI:', prompt);
-            }
 
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
                 method: 'POST',
@@ -417,17 +410,10 @@ class StreakManager {
             });
 
             if (!response.ok) {
-                if (this.isDevelopment) {
-                    console.error('❌ Gemini API Error:', response.status, response.statusText);
-                }
                 throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
-            
-            if (this.isDevelopment) {
-                console.log('📥 AI Response:', data);
-            }
             
             if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
                 throw new Error('Invalid response format from Gemini API');
@@ -435,35 +421,15 @@ class StreakManager {
 
             const resultText = data.candidates[0].content.parts[0].text.trim().toLowerCase();
             
-            if (this.isDevelopment) {
-                console.log('💬 AI Answer:', resultText);
-            }
-            
             // Check if the response is "ya" or "tidak"
             const isCorrect = resultText.includes('ya') && !resultText.includes('tidak');
-            
-            if (this.isDevelopment) {
-                console.log('✅ Evaluation result:', isCorrect ? 'CORRECT ✅' : 'INCORRECT ❌');
-            }
             
             return isCorrect;
 
         } catch (error) {
-            if (this.isDevelopment) {
-                console.error('🚫 Error evaluating streak:', error);
-                console.log('🔄 Using development fallback (70% success rate)');
-            } else {
-                console.error('Error evaluating streak:', error);
-            }
-            
-            // Fallback to random for testing (higher success rate in development)
-            const fallbackSuccess = this.isDevelopment ? Math.random() > 0.2 : Math.random() > 0.3; // 80% vs 70%
-            
-            if (this.isDevelopment) {
-                console.log('🎲 Fallback result:', fallbackSuccess ? 'SUCCESS ✅' : 'FAIL ❌');
-            }
-            
-            return fallbackSuccess;
+            console.error('Error evaluating streak:', error);
+            // Fallback to random for testing
+            return Math.random() > 0.3; // 70% chance of success for testing
         }
     }
 
@@ -495,19 +461,22 @@ class StreakManager {
             if (isCorrect) {
                 // Streak evaluation passed - add to streak
                 this.addToStreak();
-                this.displayAnalysisResult(95, 'Ya - Bacaan benar! Streak bertambah! 🎉');
+                this.displayAnalysisResult(true);
             } else {
                 // Streak evaluation failed - no streak added
-                this.displayAnalysisResult(60, 'Tidak - Bacaan belum tepat. Coba lagi! 💪');
+                this.displayAnalysisResult(false);
             }
 
         } catch (error) {
-            // Fallback to mock analysis if AI fails
-            const mockAccuracy = 80 + Math.random() * 15; // 80-95%
-            const feedback = this.generateMockFeedback(mockAccuracy);
-            this.displayAnalysisResult(mockAccuracy, feedback);
+            // Fallback for AI failure
+            const fallbackResult = Math.random() > 0.3; // 70% success
+            if (fallbackResult) {
+                this.addToStreak();
+                this.displayAnalysisResult(true);
+            } else {
+                this.displayAnalysisResult(false);
+            }
             
-            // Just log error, no annoying popup
             console.log('AI Analysis fallback mode:', error.message);
 
         } finally {
@@ -627,7 +596,7 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
     }
 
     // Display analysis result
-    displayAnalysisResult(accuracy, feedback, additionalInfo = null) {
+    displayAnalysisResult(isCorrect, feedback) {
         const analysisResult = document.getElementById('analysis-result');
         const accuracyEmoji = document.getElementById('accuracy-emoji');
         const accuracyScore = document.getElementById('accuracy-score');
@@ -635,55 +604,39 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
         if (!analysisResult) return;
 
-        // Update accuracy display
+        // Hide accuracy score completely - only show emoji and feedback
         if (accuracyScore) {
-            accuracyScore.textContent = `${Math.round(accuracy)}%`;
+            accuracyScore.style.display = 'none';
         }
 
+        // Display result based on Ya/Tidak only
         if (accuracyEmoji) {
-            if (accuracy >= 90) {
-                accuracyEmoji.textContent = '🎯';
-            } else if (accuracy >= 80) {
-                accuracyEmoji.textContent = '👍';
-            } else {
-                accuracyEmoji.textContent = '📖';
-            }
+            accuracyEmoji.textContent = isCorrect ? '✅' : '❌';
         }
 
         // Display streak evaluation feedback
         if (aiFeedback) {
             let resultHtml = '';
-            if (feedback.includes('Ya -')) {
+            if (isCorrect) {
                 resultHtml = `
                     <div class="text-center">
                         <div class="text-2xl font-bold text-green-600 mb-2">✅ YA</div>
-                        <div class="text-lg text-green-700">${feedback}</div>
+                        <div class="text-lg text-green-700">Bacaan benar! Streak bertambah! 🎉</div>
                         <div class="mt-3 p-3 bg-green-100 rounded-lg">
-                            <span class="font-semibold">Streak berhasil ditambahkan!</span>
-                        </div>
-                    </div>
-                `;
-            } else if (feedback.includes('Tidak -')) {
-                resultHtml = `
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-red-600 mb-2">❌ TIDAK</div>
-                        <div class="text-lg text-red-700">${feedback}</div>
-                        <div class="mt-3 p-3 bg-red-100 rounded-lg">
-                            <span class="font-semibold">Streak tidak ditambahkan. Coba lagi!</span>
+                            <span class="font-semibold">Alhamdulillah, streak berhasil ditambahkan!</span>
                         </div>
                     </div>
                 `;
             } else {
-                // Fallback for old format
-                let simpleFeedback = '';
-                if (accuracy >= 90) {
-                    simpleFeedback = 'Excellent! 🎯';
-                } else if (accuracy >= 80) {
-                    simpleFeedback = 'Good! 👍';
-                } else {
-                    simpleFeedback = 'Keep practicing! 📖';
-                }
-                resultHtml = `<div class="text-lg font-semibold text-center">${simpleFeedback}</div>`;
+                resultHtml = `
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600 mb-2">❌ TIDAK</div>
+                        <div class="text-lg text-red-700">Bacaan belum tepat. Coba lagi! 💪</div>
+                        <div class="mt-3 p-3 bg-red-100 rounded-lg">
+                            <span class="font-semibold">Streak tidak ditambahkan. Terus berlatih!</span>
+                        </div>
+                    </div>
+                `;
             }
             aiFeedback.innerHTML = resultHtml;
         }
@@ -695,16 +648,8 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
     addToStreak() {
         const today = new Date().toISOString().split('T')[0];
         
-        if (this.isDevelopment) {
-            console.log('🎯 Adding to streak - Date:', today);
-            console.log('📊 Current streak before:', this.streakData.currentStreak);
-        }
-        
         // Check if already completed today
         if (this.streakData.lastCompleted === today) {
-            if (this.isDevelopment) {
-                console.log('⚠️ Streak sudah ditambahkan hari ini');
-            }
             return;
         }
 
@@ -733,15 +678,6 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
         this.saveStreakData();
         this.updateStreakDisplay();
         this.updateRecentSessions();
-
-        if (this.isDevelopment) {
-            console.log('✅ Streak berhasil ditambahkan!');
-            console.log('📊 Current streak after:', this.streakData.currentStreak);
-            console.log('🏆 Longest streak:', this.streakData.longestStreak);
-            console.log('📈 Total sessions:', this.streakData.totalSessions);
-        } else {
-            console.log('Streak berhasil ditambahkan! Current streak:', this.streakData.currentStreak);
-        }
     }
 
     // Complete today's session
@@ -909,6 +845,7 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
     }
 
     // Reset session UI
+    // Reset session after completion
     resetSession() {
         const audioPlayback = document.getElementById('audio-playback');
         const analysisResult = document.getElementById('analysis-result');
@@ -918,8 +855,10 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
         this.recordedAudioBlob = null;
         
-        // Load new random surah for next session
-        this.loadRandomSurah();
+        // Only load new surah if no verse is currently displayed
+        if (!this.selectedVerse) {
+            this.loadRandomSurah();
+        }
     }
 
     // Show error message

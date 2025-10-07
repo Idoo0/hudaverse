@@ -180,6 +180,7 @@ class StreakManager {
             const verseText = surahInfo.text[randomVerseKey];
             const verseTranslation = surahInfo.translations?.id?.text?.[randomVerseKey] || 'Terjemahan tidak tersedia';
             
+            console.log('📊 === SETTING SELECTED VERSE ===');
             console.log('Selected verse key:', randomVerseKey);
             console.log('Selected verse text:', verseText);
 
@@ -191,7 +192,13 @@ class StreakManager {
                 translation: verseTranslation
             };
 
-            console.log('Selected verse object:', this.selectedVerse);
+            console.log('📊 === FINAL SELECTED VERSE OBJECT ===');
+            console.log('✅ selectedVerse.surah:', this.selectedVerse.surah, typeof this.selectedVerse.surah);
+            console.log('✅ selectedVerse.surahName:', this.selectedVerse.surahName);
+            console.log('✅ selectedVerse.ayah:', this.selectedVerse.ayah, typeof this.selectedVerse.ayah);
+            console.log('✅ selectedVerse.arabic:', this.selectedVerse.arabic?.substring(0, 50) + '...');
+            console.log('✅ selectedVerse.translation:', this.selectedVerse.translation?.substring(0, 50) + '...');
+            console.log('📊 === VERSE SETTING COMPLETE ===');
             this.displayRandomSurahInfo();
             this.displayVerse();
             
@@ -313,6 +320,49 @@ class StreakManager {
         // Refresh lucide icons
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
+        }
+    }
+
+    // TEST METHOD: Load Al-Alaq 96:4 specifically for debugging
+    async loadSpecificVerse(surahNumber = 96, ayatNumber = 4) {
+        console.log(`🎯 Loading specific verse: Surah ${surahNumber}, Ayat ${ayatNumber}`);
+        
+        try {
+            const response = await fetch(`data/surah/${surahNumber}.json`);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load surah ${surahNumber}: ${response.status}`);
+            }
+
+            const surahData = await response.json();
+            const surahInfo = surahData[surahNumber.toString()];
+            
+            if (!surahInfo || !surahInfo.text || !surahInfo.text[ayatNumber.toString()]) {
+                throw new Error(`Ayat ${ayatNumber} not found in surah ${surahNumber}`);
+            }
+
+            const verseText = surahInfo.text[ayatNumber.toString()];
+            const verseTranslation = surahInfo.translations?.id?.text?.[ayatNumber.toString()] || 'Terjemahan tidak tersedia';
+            
+            this.selectedVerse = {
+                surah: surahNumber,
+                surahName: this.surahList.find(s => s.number === surahNumber)?.name || surahInfo.name_latin || `Surah ${surahNumber}`,
+                ayah: ayatNumber,
+                arabic: verseText,
+                translation: verseTranslation
+            };
+
+            console.log('🎯 Al-Alaq 96:4 loaded successfully:');
+            console.log('  - Surah:', this.selectedVerse.surah, this.selectedVerse.surahName);
+            console.log('  - Ayat:', this.selectedVerse.ayah);
+            console.log('  - Arabic:', this.selectedVerse.arabic);
+            console.log('  - Translation:', this.selectedVerse.translation);
+
+            this.displayRandomSurahInfo();
+            this.displayVerse();
+            
+        } catch (error) {
+            console.error('Error loading specific verse:', error);
         }
     }
 
@@ -446,10 +496,32 @@ class StreakManager {
     // Evaluate streak using Google Generative AI
     async evaluateStreak(surahNumber, ayatNumber, audioBlob) {
         try {
-            console.log('🔍 Starting AI evaluation...');
-            console.log('📄 Surah:', surahNumber, 'Ayat:', ayatNumber);
+            console.log('🔍 === AI EVALUATION START ===');
+            console.log('📄 PARAMETERS RECEIVED:');
+            console.log('  - Surah Number:', surahNumber, typeof surahNumber);
+            console.log('  - Ayat Number:', ayatNumber, typeof ayatNumber);
             console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
             console.log('🎵 Audio type:', audioBlob.type);
+            
+            console.log('📋 CURRENT SELECTED VERSE:');
+            console.log('  - this.selectedVerse.surah:', this.selectedVerse?.surah);
+            console.log('  - this.selectedVerse.ayah:', this.selectedVerse?.ayah);
+            console.log('  - this.selectedVerse.surahName:', this.selectedVerse?.surahName);
+            console.log('  - this.selectedVerse.arabic:', this.selectedVerse?.arabic?.substring(0, 50) + '...');
+            
+            // Validate parameters match selected verse
+            if (this.selectedVerse) {
+                if (surahNumber !== this.selectedVerse.surah) {
+                    console.error('❌ PARAMETER MISMATCH - SURAH:');
+                    console.error('  Expected:', this.selectedVerse.surah, this.selectedVerse.surahName);
+                    console.error('  Received:', surahNumber);
+                }
+                if (ayatNumber !== this.selectedVerse.ayah) {
+                    console.error('❌ PARAMETER MISMATCH - AYAT:');
+                    console.error('  Expected:', this.selectedVerse.ayah);
+                    console.error('  Received:', ayatNumber);
+                }
+            }
 
             // Get AI Service Manager instance
             const aiService = window.aiServiceManager;
@@ -468,9 +540,18 @@ class StreakManager {
             console.log('📊 Base64 audio length:', base64Audio.length);
             
             const apiKey = aiService.apiKey;
-            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${surahNumber}, ayat: ${ayatNumber}. jawab dengan Ya atau Tidak hanya 1 kata itu. ingat harus tergabung pada surah dan ayat tersebut`;
+            
+            // Use CORRECT parameters from selectedVerse
+            const correctSurah = this.selectedVerse.surah;
+            const correctAyat = this.selectedVerse.ayah;
+            const correctSurahName = this.selectedVerse.surahName;
+            
+            const prompt = `Apakah ayat yang diucapkan mengandung bacaan alquran, surah: ${correctSurah}, ayat: ${correctAyat}. jawab dengan Ya atau Tidak hanya 1 kata itu. ingat harus tergabung pada surah dan ayat tersebut`;
 
-            console.log('📝 Prompt sent to AI:', prompt);
+            console.log('📝 CORRECTED PROMPT:');
+            console.log('  - Using Surah:', correctSurah, '(' + correctSurahName + ')');
+            console.log('  - Using Ayat:', correctAyat);
+            console.log('  - Full prompt:', prompt);
 
             const requestBody = {
                 contents: [{
@@ -530,7 +611,7 @@ class StreakManager {
             const isCorrect = containsYa && !containsTidak;
             
             console.log('✅ Final evaluation result:', isCorrect ? 'CORRECT (YA) ✅' : 'INCORRECT (TIDAK) ❌');
-            console.log('-------------------');
+            console.log('🔍 === AI EVALUATION END ===');
             
             return isCorrect;
 
@@ -575,15 +656,16 @@ class StreakManager {
 
         try {
             console.log('🚀 === CALLING EVALUATE STREAK ===');
-            console.log('🚀 Parameters:');
-            console.log('  - Surah:', this.selectedVerse.surah);
+            console.log('🚀 Current selectedVerse:');
+            console.log('  - Surah:', this.selectedVerse.surah, '(' + this.selectedVerse.surahName + ')');
             console.log('  - Ayah:', this.selectedVerse.ayah);
+            console.log('  - Arabic text:', this.selectedVerse.arabic?.substring(0, 100) + '...');
             console.log('  - Audio size:', this.recordedAudioBlob.size);
             
-            // Use the new evaluateStreak function
+            // Use the new evaluateStreak function with CORRECT parameters
             const isCorrect = await this.evaluateStreak(
-                this.selectedVerse.surah, 
-                this.selectedVerse.ayah, 
+                this.selectedVerse.surah,  // Use correct surah number
+                this.selectedVerse.ayah,   // Use correct ayat number
                 this.recordedAudioBlob
             );
 

@@ -13,13 +13,57 @@ class StreakManager {
 
     // Initialize the app
     async init() {
+        console.log('🚀 === STREAK MANAGER INITIALIZATION ===');
         await this.loadSurahList();
         this.setupEventListeners();
         this.updateStreakDisplay();
         this.checkStreakStatus();
         
+        // Add DOM mutation observer for debugging
+        this.setupDOMObserver();
+        
         // Langsung load random surah
         await this.loadRandomSurah();
+        console.log('🚀 === INITIALIZATION COMPLETE ===');
+    }
+
+    // Setup DOM observer to detect UI changes
+    setupDOMObserver() {
+        console.log('👁️ Setting up DOM observer...');
+        const analysisResult = document.getElementById('analysis-result');
+        const accuracyEmoji = document.getElementById('accuracy-emoji');
+        const aiFeedback = document.getElementById('ai-feedback');
+
+        if (analysisResult) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        console.log('🔍 DOM CHANGE DETECTED in', mutation.target.id || 'unknown element');
+                        if (mutation.target.id === 'accuracy-emoji') {
+                            console.log('😀 Emoji changed to:', mutation.target.textContent);
+                        }
+                        if (mutation.target.id === 'ai-feedback' || mutation.target.closest('#ai-feedback')) {
+                            console.log('📝 Feedback changed, first 100 chars:', 
+                                (mutation.target.textContent || mutation.target.innerHTML || '').substring(0, 100));
+                        }
+                    }
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        console.log('🎨 Class changed on', mutation.target.id || 'unknown element', 
+                            'new classes:', mutation.target.className);
+                    }
+                });
+            });
+
+            observer.observe(analysisResult, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+
+            console.log('👁️ DOM observer setup complete');
+        }
     }
 
     // Load streak data from localStorage
@@ -193,6 +237,8 @@ class StreakManager {
 
     // Setup event listeners
     setupEventListeners() {
+        console.log('🎛️ Setting up event listeners...');
+        
         const recordBtn = document.getElementById('record-btn');
         const analyzeBtn = document.getElementById('analyze-btn');
         const retryBtn = document.getElementById('retry-btn');
@@ -200,24 +246,51 @@ class StreakManager {
         const newVerseBtn = document.getElementById('new-verse-btn');
 
         if (recordBtn) {
-            recordBtn.addEventListener('click', () => this.toggleRecording());
+            recordBtn.addEventListener('click', () => {
+                console.log('🔴 Record button clicked');
+                this.toggleRecording();
+            });
+            console.log('✅ Record button listener added');
         }
 
         if (analyzeBtn) {
-            analyzeBtn.addEventListener('click', () => this.analyzeRecording());
+            analyzeBtn.addEventListener('click', () => {
+                console.log('🧠 Analyze button clicked - checking if already processing...');
+                if (analyzeBtn.disabled) {
+                    console.log('⚠️ Analyze button already disabled, ignoring click');
+                    return;
+                }
+                console.log('🧠 Proceeding with analysis...');
+                this.analyzeRecording();
+            });
+            console.log('✅ Analyze button listener added');
         }
 
         if (retryBtn) {
-            retryBtn.addEventListener('click', () => this.retryRecording());
+            retryBtn.addEventListener('click', () => {
+                console.log('🔄 Retry button clicked');
+                this.retryRecording();
+            });
+            console.log('✅ Retry button listener added');
         }
 
         if (completeBtn) {
-            completeBtn.addEventListener('click', () => this.completeSession());
+            completeBtn.addEventListener('click', () => {
+                console.log('✅ Complete button clicked');
+                this.completeSession();
+            });
+            console.log('✅ Complete button listener added');
         }
 
         if (newVerseBtn) {
-            newVerseBtn.addEventListener('click', () => this.loadNewVerse());
+            newVerseBtn.addEventListener('click', () => {
+                console.log('🆕 New verse button clicked');
+                this.loadNewVerse();
+            });
+            console.log('✅ New verse button listener added');
         }
+
+        console.log('🎛️ All event listeners setup complete');
     }
 
     // Load new verse manually
@@ -475,7 +548,9 @@ class StreakManager {
 
     // Analyze recording with AI
     async analyzeRecording() {
+        console.log('🎬 === ANALYZE RECORDING START ===');
         console.log('🎬 Starting analyze recording...');
+        console.log('🎬 Current timestamp:', new Date().toISOString());
         
         if (!this.selectedVerse) {
             console.error('❌ No verse selected');
@@ -493,11 +568,17 @@ class StreakManager {
 
         const analyzeBtn = document.getElementById('analyze-btn');
         if (analyzeBtn) {
+            console.log('🔄 Setting button to loading state...');
             analyzeBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 inline animate-spin"></i>Mengevaluasi...';
+            analyzeBtn.disabled = true; // Prevent double clicks
         }
 
         try {
-            console.log('🚀 Calling evaluateStreak...');
+            console.log('🚀 === CALLING EVALUATE STREAK ===');
+            console.log('🚀 Parameters:');
+            console.log('  - Surah:', this.selectedVerse.surah);
+            console.log('  - Ayah:', this.selectedVerse.ayah);
+            console.log('  - Audio size:', this.recordedAudioBlob.size);
             
             // Use the new evaluateStreak function
             const isCorrect = await this.evaluateStreak(
@@ -506,25 +587,36 @@ class StreakManager {
                 this.recordedAudioBlob
             );
 
-            console.log('📊 Evaluation result received:', isCorrect);
+            console.log('📊 === EVALUATION RESULT RECEIVED ===');
+            console.log('📊 Raw result:', isCorrect);
+            console.log('📊 Type of result:', typeof isCorrect);
+            console.log('📊 Boolean conversion:', Boolean(isCorrect));
 
             if (isCorrect) {
+                console.log('✅ === PROCESSING SUCCESS RESULT ===');
                 console.log('✅ Result: CORRECT - Adding to streak');
                 // Streak evaluation passed - add to streak
                 this.addToStreak();
+                console.log('✅ About to display success result...');
                 this.displayAnalysisResult(true);
+                console.log('✅ Success result displayed');
             } else {
+                console.log('❌ === PROCESSING FAIL RESULT ===');
                 console.log('❌ Result: INCORRECT - No streak added');
                 // Streak evaluation failed - no streak added
+                console.log('❌ About to display fail result...');
                 this.displayAnalysisResult(false);
+                console.log('❌ Fail result displayed');
             }
 
         } catch (error) {
-            console.error('🚫 Error in analyzeRecording:', error);
+            console.error('🚫 === ERROR IN ANALYZE RECORDING ===');
+            console.error('🚫 Error details:', error);
             
             // Fallback for AI failure
             const fallbackResult = Math.random() > 0.3; // 70% success
-            console.log('🎲 Using fallback result:', fallbackResult);
+            console.log('🎲 === USING FALLBACK ===');
+            console.log('🎲 Fallback result:', fallbackResult);
             
             if (fallbackResult) {
                 console.log('✅ Fallback: SUCCESS - Adding to streak');
@@ -538,14 +630,19 @@ class StreakManager {
             console.log('AI Analysis fallback mode:', error.message);
 
         } finally {
+            console.log('🔄 === RESTORING BUTTON STATE ===');
             if (analyzeBtn) {
                 analyzeBtn.innerHTML = '<i data-lucide="brain" class="w-4 h-4 mr-2 inline"></i>Evaluasi Streak';
+                analyzeBtn.disabled = false;
+                console.log('🔄 Button restored to normal state');
             }
             
             // Refresh lucide icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
+            
+            console.log('🎬 === ANALYZE RECORDING END ===');
         }
     }
 
@@ -660,12 +757,20 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
     // Display analysis result
     displayAnalysisResult(isCorrect) {
+        console.log('🖼️ === DISPLAY ANALYSIS RESULT START ===');
+        console.log('🖼️ Input parameter isCorrect:', isCorrect, typeof isCorrect);
         console.log('🖼️ Displaying analysis result:', isCorrect ? 'CORRECT ✅' : 'INCORRECT ❌');
         
         const analysisResult = document.getElementById('analysis-result');
         const accuracyEmoji = document.getElementById('accuracy-emoji');
         const accuracyScore = document.getElementById('accuracy-score');
         const aiFeedback = document.getElementById('ai-feedback');
+
+        console.log('🖼️ DOM Elements found:');
+        console.log('  - analysisResult:', !!analysisResult);
+        console.log('  - accuracyEmoji:', !!accuracyEmoji);
+        console.log('  - accuracyScore:', !!accuracyScore);
+        console.log('  - aiFeedback:', !!aiFeedback);
 
         if (!analysisResult) {
             console.error('❌ analysis-result element not found');
@@ -681,12 +786,15 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
         // Display result based on Ya/Tidak only
         if (accuracyEmoji) {
             const emoji = isCorrect ? '✅' : '❌';
+            console.log('😀 Setting emoji from', accuracyEmoji.textContent, 'to', emoji);
             accuracyEmoji.textContent = emoji;
-            console.log('😀 Set emoji to:', emoji);
+            console.log('😀 Emoji actually set to:', accuracyEmoji.textContent);
         }
 
         // Display streak evaluation feedback
         if (aiFeedback) {
+            console.log('📝 Current aiFeedback content before change:', aiFeedback.innerHTML.substring(0, 100));
+            
             let resultHtml = '';
             if (isCorrect) {
                 resultHtml = `
@@ -698,7 +806,7 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
                         </div>
                     </div>
                 `;
-                console.log('✅ Displaying SUCCESS feedback');
+                console.log('✅ Preparing SUCCESS feedback HTML');
             } else {
                 resultHtml = `
                     <div class="text-center">
@@ -709,13 +817,18 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
                         </div>
                     </div>
                 `;
-                console.log('❌ Displaying FAIL feedback');
+                console.log('❌ Preparing FAIL feedback HTML');
             }
+            
+            console.log('📝 Setting new HTML content...');
             aiFeedback.innerHTML = resultHtml;
+            console.log('📝 New aiFeedback content after change:', aiFeedback.innerHTML.substring(0, 100));
         }
 
+        console.log('👁️ Showing analysis result...');
         analysisResult.classList.remove('hidden');
-        console.log('👁️ Analysis result shown');
+        console.log('👁️ Analysis result visibility:', !analysisResult.classList.contains('hidden'));
+        console.log('🖼️ === DISPLAY ANALYSIS RESULT END ===');
     }
 
     // Add to streak when evaluation is successful

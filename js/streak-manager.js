@@ -8,6 +8,8 @@ class StreakManager {
         this.surahList = [];
         this.selectedVerse = null;
         this.isAnalyzing = false; // Flag to prevent verse changes during analysis
+        this.analysisVerse = null; // Locked verse data for current analysis
+        this.resetTimeoutId = null; // Track reset timeout
         
         this.init();
     }
@@ -185,6 +187,11 @@ class StreakManager {
             console.log('Selected verse key:', randomVerseKey);
             console.log('Selected verse text:', verseText);
 
+            console.log('🔄 === CHANGING SELECTEDVERSE IN LOADRANDOMSURAH ===');
+            console.log('🔄 From:', this.selectedVerse ? `${this.selectedVerse.surah}:${this.selectedVerse.ayah} (${this.selectedVerse.surahName})` : 'null');
+            console.log('🔄 To:', `${randomSurahNumber}:${parseInt(randomVerseKey)} (${this.surahList.find(s => s.number === randomSurahNumber)?.name || 'Unknown'})`);
+            console.log('🔄 isAnalyzing:', this.isAnalyzing);
+            
             this.selectedVerse = {
                 surah: randomSurahNumber,
                 surahName: this.surahList.find(s => s.number === randomSurahNumber)?.name || surahInfo.name_latin || `Surah ${randomSurahNumber}`,
@@ -192,6 +199,8 @@ class StreakManager {
                 arabic: verseText,
                 translation: verseTranslation
             };
+            
+            console.log('🔄 === SELECTEDVERSE CHANGED ===');
 
             console.log('📊 === FINAL SELECTED VERSE OBJECT ===');
             console.log('✅ selectedVerse.surah:', this.selectedVerse.surah, typeof this.selectedVerse.surah);
@@ -351,6 +360,10 @@ class StreakManager {
             const verseText = surahInfo.text[ayatNumber.toString()];
             const verseTranslation = surahInfo.translations?.id?.text?.[ayatNumber.toString()] || 'Terjemahan tidak tersedia';
             
+            console.log('🔄 === CHANGING SELECTEDVERSE IN LOADSPECIFICVERSE ===');
+            console.log('🔄 From:', this.selectedVerse ? `${this.selectedVerse.surah}:${this.selectedVerse.ayah}` : 'null');
+            console.log('🔄 To:', `${surahNumber}:${ayatNumber}`);
+            
             this.selectedVerse = {
                 surah: surahNumber,
                 surahName: this.surahList.find(s => s.number === surahNumber)?.name || surahInfo.name_latin || `Surah ${surahNumber}`,
@@ -358,6 +371,9 @@ class StreakManager {
                 arabic: verseText,
                 translation: verseTranslation
             };
+            
+            console.log('🔄 === SELECTEDVERSE CHANGED ===');
+            console.log('🔄 Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
 
             console.log('🎯 Al-Alaq 96:4 loaded successfully:');
             console.log('  - Surah:', this.selectedVerse.surah, this.selectedVerse.surahName);
@@ -394,7 +410,7 @@ class StreakManager {
         const verseArabic = document.getElementById('verse-arabic');
         const verseTranslation = document.getElementById('verse-translation');
 
-        if (verseReference) {
+        if (verseReference) { 
             const referenceText = `QS. ${this.selectedVerse.surahName} (${this.selectedVerse.surah}): ${this.selectedVerse.ayah}`;
             verseReference.textContent = referenceText;
             console.log('📺 Reference set to:', referenceText);
@@ -648,21 +664,30 @@ class StreakManager {
         console.log('🎬 Starting analyze recording...');
         console.log('🎬 Current timestamp:', new Date().toISOString());
         
-        // IMPORTANT: Freeze selectedVerse to prevent changes during analysis
-        const frozenSelectedVerse = this.selectedVerse ? { ...this.selectedVerse } : null;
-        
-        // Debug selectedVerse IMMEDIATELY at start
-        console.log('🔍 === IMMEDIATE SELECTEDVERSE CHECK ===');
-        if (frozenSelectedVerse) {
-            console.log('✅ selectedVerse exists and frozen:');
-            console.log('  - Surah:', frozenSelectedVerse.surah, '(' + frozenSelectedVerse.surahName + ')');
-            console.log('  - Ayah:', frozenSelectedVerse.ayah);
-            console.log('  - Arabic (first 50 chars):', frozenSelectedVerse.arabic?.substring(0, 50));
-        } else {
+        // CRITICAL: Lock the current verse for analysis - cannot be changed!
+        if (!this.selectedVerse) {
             console.error('❌ selectedVerse is null/undefined!');
             this.showError('Data ayat hilang! Silakan muat ulang halaman.');
             return;
         }
+        
+        // Create immutable copy for analysis
+        this.analysisVerse = Object.freeze({
+            surah: this.selectedVerse.surah,
+            surahName: this.selectedVerse.surahName,
+            ayah: this.selectedVerse.ayah,
+            arabic: this.selectedVerse.arabic,
+            translation: this.selectedVerse.translation
+        });
+        
+        console.log('� === VERSE LOCKED FOR ANALYSIS ===');
+        console.log('🔒 Locked verse:');
+        console.log('  - Surah:', this.analysisVerse.surah, '(' + this.analysisVerse.surahName + ')');
+        console.log('  - Ayah:', this.analysisVerse.ayah);
+        console.log('  - Arabic (first 50 chars):', this.analysisVerse.arabic?.substring(0, 50));
+        console.log('🔒 Current selectedVerse (may change):');
+        console.log('  - Surah:', this.selectedVerse?.surah, '(' + this.selectedVerse?.surahName + ')');
+        console.log('  - Ayah:', this.selectedVerse?.ayah);
         
         if (!this.recordedAudioBlob) {
             console.error('❌ No audio recorded');
@@ -685,16 +710,16 @@ class StreakManager {
 
         try {
             console.log('🚀 === CALLING EVALUATE STREAK ===');
-            console.log('🚀 Using frozen selectedVerse:');
-            console.log('  - Surah:', frozenSelectedVerse.surah, '(' + frozenSelectedVerse.surahName + ')');
-            console.log('  - Ayah:', frozenSelectedVerse.ayah);
-            console.log('  - Arabic text:', frozenSelectedVerse.arabic?.substring(0, 100) + '...');
+            console.log('🚀 Using LOCKED analysisVerse:');
+            console.log('  - Surah:', this.analysisVerse.surah, '(' + this.analysisVerse.surahName + ')');
+            console.log('  - Ayah:', this.analysisVerse.ayah);
+            console.log('  - Arabic text:', this.analysisVerse.arabic?.substring(0, 100) + '...');
             console.log('  - Audio size:', this.recordedAudioBlob.size);
             
-            // Use frozen selectedVerse data to prevent race conditions
+            // Use locked analysisVerse data - guaranteed not to change!
             const isCorrect = await this.evaluateStreak(
-                frozenSelectedVerse.surah,
-                frozenSelectedVerse.ayah,
+                this.analysisVerse.surah,
+                this.analysisVerse.ayah,
                 this.recordedAudioBlob
             );
 
@@ -743,8 +768,10 @@ class StreakManager {
         } finally {
             console.log('🔄 === RESTORING BUTTON STATE ===');
             
-            // Reset analysis flag
+            // Reset analysis flag and clear locked verse
             this.isAnalyzing = false;
+            this.analysisVerse = null;
+            console.log('🔓 Analysis verse unlocked and cleared');
             
             if (analyzeBtn) {
                 analyzeBtn.innerHTML = '<i data-lucide="brain" class="w-4 h-4 mr-2 inline"></i>Evaluasi Streak';
@@ -994,6 +1021,11 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
 
     // Complete today's session
     completeSession() {
+        console.log('🏁 === COMPLETE SESSION CALLED ===');
+        console.log('🏁 isAnalyzing:', this.isAnalyzing);
+        console.log('🏁 Current selectedVerse:', this.selectedVerse ? `${this.selectedVerse.surah}:${this.selectedVerse.ayah}` : 'null');
+        console.log('🏁 Stack trace:', new Error().stack?.split('\n').slice(1, 3).join('\n'));
+        
         // Prevent completing session during analysis
         if (this.isAnalyzing) {
             console.log('⚠️ Cannot complete session - analysis in progress');
@@ -1041,9 +1073,20 @@ Akurasi harus realistis (70-95%) dan feedback harus sesuai dengan tingkat kesuli
         // Just log success, no popup
         console.log('Session completed successfully! Streak updated.');
 
-        // Reset UI
-        setTimeout(() => {
-            this.resetSession();
+        // Reset UI - Cancel any existing timeout
+        if (this.resetTimeoutId) {
+            console.log('🔄 Canceling existing reset timeout');
+            clearTimeout(this.resetTimeoutId);
+        }
+        
+        this.resetTimeoutId = setTimeout(() => {
+            console.log('🔄 Reset timeout triggered');
+            if (!this.isAnalyzing) {
+                this.resetSession();
+            } else {
+                console.log('⚠️ Skipping reset - analysis in progress');
+            }
+            this.resetTimeoutId = null;
         }, 2000);
     }
 

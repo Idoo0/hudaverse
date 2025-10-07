@@ -1,6 +1,6 @@
 {
-  "name": "HidayahPath - Aplikasi Islami",
-  "short_name": "HidayahPath",
+  "name": "HudaVerse",
+  "short_name": "HudaVerse",
   "description": "Aplikasi Islami untuk membaca Al-Quran, mengelola aktivitas harian, dan memperkuat spiritual",
   "start_url": "/hudaverse/",
   "display": "standalone",
@@ -12,6 +12,12 @@
   "dir": "ltr",
   "categories": ["religion", "lifestyle", "education"],
   "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
     {
       "src": "icons/icon-72x72.png",
       "sizes": "72x72",
@@ -69,8 +75,8 @@
       "url": "/alquran.html",
       "icons": [
         {
-          "src": "icons/icon-192x192.png",
-          "sizes": "192x192"
+          "src": "logo.png",
+          "sizes": "any"
         }
       ]
     },
@@ -81,8 +87,8 @@
       "url": "/studio.html",
       "icons": [
         {
-          "src": "icons/icon-192x192.png",
-          "sizes": "192x192"
+          "src": "logo.png",
+          "sizes": "any"
         }
       ]
     }

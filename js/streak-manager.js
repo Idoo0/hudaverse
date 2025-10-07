@@ -671,14 +671,62 @@ class StreakManager {
             return;
         }
         
-        // Create immutable copy for analysis
+        // EXTRACT DATA DIRECTLY FROM HTML DISPLAY - 100% ACCURATE!
+        const verseReferenceElement = document.getElementById('verse-reference');
+        const verseArabicElement = document.getElementById('verse-arabic');
+        const verseTranslationElement = document.getElementById('verse-translation');
+        
+        if (!verseReferenceElement || !verseArabicElement || !verseTranslationElement) {
+            console.error('❌ HTML elements not found!');
+            this.showError('Elemen ayat tidak ditemukan di halaman!');
+            return;
+        }
+        
+        // Parse reference text to extract surah and ayah
+        const referenceText = verseReferenceElement.textContent.trim();
+        console.log('📖 Raw reference text from HTML:', referenceText);
+        
+        // Expected format: "QS. Surah Name (number): ayah"
+        const referenceMatch = referenceText.match(/QS\.\s+(.+?)\s+\((\d+)\):\s*(\d+)/);
+        
+        if (!referenceMatch) {
+            console.error('❌ Could not parse reference text:', referenceText);
+            this.showError('Format referensi ayat tidak valid!');
+            return;
+        }
+        
+        const [, surahName, surahNumber, ayahNumber] = referenceMatch;
+        const arabicText = verseArabicElement.textContent.trim();
+        const translationText = verseTranslationElement.textContent.trim();
+        
+        // Create immutable copy from HTML display data
         this.analysisVerse = Object.freeze({
-            surah: this.selectedVerse.surah,
-            surahName: this.selectedVerse.surahName,
-            ayah: this.selectedVerse.ayah,
-            arabic: this.selectedVerse.arabic,
-            translation: this.selectedVerse.translation
+            surah: parseInt(surahNumber),
+            surahName: surahName,
+            ayah: parseInt(ayahNumber),
+            arabic: arabicText,
+            translation: translationText
         });
+        
+        console.log('🔒 === VERSE EXTRACTED FROM HTML DISPLAY ===');
+        console.log('🔒 Reference text:', referenceText);
+        console.log('🔒 Parsed data:');
+        console.log('  - Surah:', this.analysisVerse.surah, '(' + this.analysisVerse.surahName + ')');
+        console.log('  - Ayah:', this.analysisVerse.ayah);
+        console.log('  - Arabic (first 50 chars):', this.analysisVerse.arabic?.substring(0, 50));
+        console.log('  - Translation (first 50 chars):', this.analysisVerse.translation?.substring(0, 50));
+        
+        console.log('🔒 COMPARISON WITH SELECTEDVERSE:');
+        if (this.selectedVerse) {
+            console.log('  - selectedVerse.surah:', this.selectedVerse.surah);
+            console.log('  - selectedVerse.ayah:', this.selectedVerse.ayah);
+            const htmlMatches = (this.analysisVerse.surah === this.selectedVerse.surah && 
+                               this.analysisVerse.ayah === this.selectedVerse.ayah);
+            console.log('  - HTML matches selectedVerse:', htmlMatches);
+            if (!htmlMatches) {
+                console.warn('⚠️ HTML display differs from selectedVerse - using HTML data!');
+            }
+        }
         
         console.log('� === VERSE LOCKED FOR ANALYSIS ===');
         console.log('🔒 Locked verse:');
